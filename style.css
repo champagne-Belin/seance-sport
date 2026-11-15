@@ -67,3 +67,10 @@ h2{margin:6px 0 0;font-size:26px;line-height:1.15}
 .hist-list li{display:flex;justify-content:space-between;align-items:center;text-align:left;background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px}
 .hist-list li.empty{display:block;color:var(--muted);text-align:center}
 .del{background:transparent;border:0;color:var(--muted);font-size:18px;padding:6px 10px}
+
+.who{flex-wrap:wrap}
+.who-btn{flex:1 1 30%;padding:10px 8px;min-width:90px}
+.who-btn.add{background:transparent;border:2px dashed #2a3a4a;color:var(--muted)}
+.who-q{margin:14px 0 0;align-self:flex-start}
+.who.need{outline:2px solid #ff5a5a;border-radius:14px;animation:needp .6s 2}
+@keyframes needp{50%{outline-color:transparent}}

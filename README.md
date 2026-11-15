@@ -27,3 +27,8 @@ Trois ambiances originales générées dans l'appli (Électro 128, Hip-hop 92, P
 Ouvrir l'adresse GitHub Pages du dépôt, puis « Ajouter à l'écran d'accueil » (Safari : Partager ; Chrome : menu ⋮).
 Les durées, le nombre de tours, la voix, les bips et les vibrations se règlent dans « Réglages ».
 L'écran reste allumé pendant la séance.
+
+
+## Profils et suivi dans Notion (v7)
+- « Qui fait la séance ? » : chaque personne a son prénom (bouton « + Ajouter »). L'historique et les stats sont filtrables par personne.
+- À la fin d'une séance, elle est envoyée automatiquement vers une base Notion (via un webhook Make). Si le téléphone est hors ligne, l'envoi est refait au prochain lancement.
