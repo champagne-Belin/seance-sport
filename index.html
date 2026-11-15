@@ -33,6 +33,10 @@
       <label>Nombre de tours<input type="number" id="cfgRounds" min="1" max="12" step="1"></label>
       <label>Préparation (s)<input type="number" id="cfgPrep" min="0" max="60" step="5"></label>
     </div>
+    <div class="grid">
+      <label>Musique<select id="cfgMusic"><option value="off">Aucune</option><option value="electro">Électro (128)</option><option value="hiphop">Hip-hop (92)</option><option value="power">Power (140)</option></select></label>
+      <label>Volume musique<input type="range" id="cfgMusicVol" min="0" max="100" step="5"></label>
+    </div>
     <label class="check"><input type="checkbox" id="cfgVoice"> Voix</label>
     <label class="check"><input type="checkbox" id="cfgSound"> Bips</label>
     <label class="check"><input type="checkbox" id="cfgVibe"> Vibrations</label>
@@ -72,6 +76,7 @@
     <button id="pauseBtn" class="ctl main" aria-label="Pause">⏸</button>
     <button id="nextBtn" class="ctl" aria-label="Suivant">⏭</button>
   </div>
+  <button id="musicBtn" class="chip">♪ Électro</button>
 </section>
 
 <section id="done" class="screen">
