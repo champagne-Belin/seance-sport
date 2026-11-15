@@ -6,6 +6,7 @@ Application de chrono pour smartphone (PWA, fonctionne hors ligne une fois charg
 **Rythme** : 40 s de travail / 20 s de repos, 1 min 20 de pause à la fin de chaque tour, 4 tours.
 
 ## Séances
+- **Échauffement** (4 min, en douceur) : marche sur place 1 min, cercles de bras 30 s, rotations de hanches 30 s, squats en douceur 1 min, jumping jacks 1 min. Non compté dans l'historique.
 - **Séance A** : corps entier (squats, fentes, rowing, pompes, devil press, planche)
 - **Séance B** : fessiers, dos, triceps (soulevé de terre roumain, pont fessier, rowing à un bras, développé épaules, dips sur chaise, mountain climbers)
 

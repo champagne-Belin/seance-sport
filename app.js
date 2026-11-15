@@ -61,7 +61,35 @@ const SESSION_B=[
   frames:[pose([163,118],[150,125],[109,143],[150,150],[150,175],[140,152],[118,174],[76,156],[44,172]),
           pose([163,118],[150,125],[109,143],[150,150],[150,175],[76,156],[44,172],[140,152],[118,174])]}
 ];
+
+/* ====== Échauffement en douceur ====== */
+const armFrame=th=>{const sn=Math.sin(th),cs=Math.cos(th),N=[100,60];
+  return pose([100,46],N,[100,105],[N[0]+26*sn,N[1]+26*cs],[N[0]+48*sn,N[1]+48*cs],...STAND_LEGS);};
+const WARM=[
+ {name:'Marche sur place',spoken:'Marche sur place',dur:60,weight:false,foot:true,seg:0.55,
+  tip:'Montez les genoux sans forcer, balancez les bras, respirez calmement. Le corps se réchauffe tout doucement.',
+  frames:[pose([100,46],[100,60],[100,105],[112,84],[118,104],[116,126],[110,152],[98,140],[96,175]),
+          pose([100,46],[100,60],[100,105],[90,84],[86,106],[102,140],[100,175],[116,126],[110,152])]},
+ {name:'Cercles de bras',spoken:'Cercles de bras',dur:30,weight:false,foot:true,seg:0.4,
+  tip:'Bras tendus, grands cercles lents vers l’avant, puis vers l’arrière à la moitié du temps.',
+  frames:[0,1,2,3,4,5,6,7].map(i=>armFrame(i*Math.PI/4))},
+ {name:'Rotations de hanches',spoken:'Rotations de hanches',dur:30,weight:false,foot:true,seg:0.7,
+  tip:'Mains sur les hanches, dessinez de grands cercles avec le bassin, jambes souples.',
+  frames:[pose([96,46],[97,60],[110,105],[112,84],[108,102],...STAND_LEGS),
+          pose([100,46],[100,60],[100,103],[114,84],[104,102],...STAND_LEGS),
+          pose([104,46],[103,60],[90,105],[94,84],[92,102],...STAND_LEGS),
+          pose([100,46],[100,60],[100,103],[114,84],[104,102],...STAND_LEGS)]},
+ {name:'Squats en douceur',spoken:'Squats en douceur',dur:60,weight:false,foot:true,seg:1.5,
+  tip:'Bras tendus devant vous, descendez lentement les hanches vers l’arrière, dos droit, sans aller trop bas.',
+  frames:[pose([100,46],[100,60],[100,105],[120,62],[140,62],...STAND_LEGS),
+          pose([103,90],[98,104],[84,146],[116,106],[136,104],[118,143],[100,175],[114,143],[96,175])]},
+ {name:'Jumping jacks',spoken:'Jumping jacks',dur:60,weight:false,foot:false,seg:0.5,
+  tip:'Écartez jambes et bras en sautillant, puis rassemblez. Version douce : un pied après l’autre, sans sauter.',
+  frames:[pose([100,46],[100,60],[100,105],[104,84],[106,106],...STAND_LEGS),
+          pose([100,40],[100,54],[100,99],[106,30],[104,8],[118,136],[130,169],[84,136],[72,169])]}
+];
 const SESSIONS={
+  W:{label:'Échauffement',sub:'En douceur',warm:true,trans:5,exercises:WARM},
   A:{label:'Séance A',sub:'Corps entier',exercises:SESSION_A},
   B:{label:'Séance B',sub:'Fessiers, dos, triceps',exercises:SESSION_B}
 };
@@ -146,7 +174,7 @@ bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe'
 
 function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
 applySession();
-const APP_VERSION='6';
+const APP_VERSION='8';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
@@ -158,8 +186,17 @@ function spokenDuration(s){
   if(r)parts.push(r+' secondes');
   return parts.join(' ')||'0 seconde';
 }
+const isWarm=()=>!!(SESSIONS[cfg.session]||{}).warm;
 function buildSteps(){
   const s=[];const n=EXERCISES.length;
+  if(isWarm()){
+    if(cfg.prep>0)s.push({type:'prep',ex:0,round:0,dur:cfg.prep});
+    EXERCISES.forEach((ex,i)=>{
+      s.push({type:'work',ex:i,round:0,dur:ex.dur});
+      if(i<n-1)s.push({type:'rest',ex:i,next:i+1,round:0,dur:SESSIONS[cfg.session].trans||5});
+    });
+    return s;
+  }
   if(cfg.prep>0)s.push({type:'prep',ex:0,round:0,dur:cfg.prep});
   for(let r=0;r<cfg.rounds;r++){
     for(let i=0;i<n;i++){
@@ -360,7 +397,7 @@ function startWorkout(){
   S.steps=buildSteps();S.idx=0;S.paused=false;
   S.startedAt=Date.now();
   if('speechSynthesis' in window)speechSynthesis.cancel();
-  say('C’est parti. '+cfg.rounds+' cycles de '+EXERCISES.length+' exercices.',true);
+  say(isWarm()?'C’est parti. Échauffement tout en douceur.':'C’est parti. '+cfg.rounds+' cycles de '+EXERCISES.length+' exercices.',true);
   show('workout');
   requestWake();
   enterStep(0,true);
@@ -377,6 +414,12 @@ function enterStep(i,first){
   tick();
 }
 function announceStart(st,first){
+  if(isWarm()){
+    if(st.type==='prep')say('Premier exercice : '+EXERCISES[0].name+'.');
+    else if(st.type==='work'){const ex=EXERCISES[st.ex];say(spoken(ex)+'. '+spokenDuration(st.dur)+'.',true);}
+    else if(st.type==='rest')say('Doucement. Ensuite : '+spoken(EXERCISES[st.next])+'.',true);
+    return;
+  }
   const roundNo=st.round+1,lastRound=roundNo===cfg.rounds;
   const prevStep=S.steps[S.idx-1];
   if(st.type==='prep'){
@@ -398,9 +441,9 @@ function renderStep(st){
   const phase=st.type;
   document.body.dataset.phase=phase;
   const ex=EXERCISES[phase==='work'||phase==='prep'?st.ex:(phase==='rest'?st.next:0)];
-  const labels={prep:'PRÉPARATION',work:'TRAVAIL',rest:'REPOS',roundrest:'PAUSE'};
+  const labels={prep:'PRÉPARATION',work:isWarm()?'ÉCHAUFFEMENT':'TRAVAIL',rest:isWarm()?'TRANSITION':'REPOS',roundrest:'PAUSE'};
   $('phaseLabel').textContent=labels[phase];
-  $('roundInfo').textContent='Tour '+(st.round+1)+' / '+cfg.rounds;
+  $('roundInfo').textContent=isWarm()?'Échauffement':'Tour '+(st.round+1)+' / '+cfg.rounds;
   const exIdx=phase==='work'||phase==='prep'?st.ex:(phase==='rest'?st.next:0);
   $('exInfo').textContent=(phase==='work'||phase==='prep')?'Exercice '+(exIdx+1)+' / '+n:'Prochain : '+(exIdx+1)+' / '+n;
   $('exName').textContent=ex.name;
@@ -442,6 +485,11 @@ function finish(){
   document.body.dataset.phase='idle';
   beep(880,.25);setTimeout(()=>beep(1100,.4),300);vibe([300,100,300,100,500]);
   const dur=Math.round((Date.now()-S.startedAt)/1000);
+  if(isWarm()){
+    say('Échauffement terminé. Vous êtes prêt. Bonne séance !',true);
+    $('doneText').textContent='Échauffement terminé · '+fmt(dur)+' · vous êtes prêt, enchaînez avec votre séance !';
+    show('done');return;
+  }
   say('Fin du cycle '+cfg.rounds+'. Séance terminée. Bravo, belle séance !',true);
   const se=SESSIONS[cfg.session]||SESSIONS.A;
   const saved=addHist({date:new Date(S.startedAt).toISOString(),session:cfg.session,label:se.label,sub:se.sub,sec:dur,rounds:cfg.rounds,count:EXERCISES.length});
@@ -512,7 +560,8 @@ function renderHome(){
   renderSeg();
   const steps=buildSteps();
   const total=steps.reduce((a,s)=>a+s.dur,0);
-  $('summary').textContent=SESSIONS[cfg.session].label+' · '+EXERCISES.length+' exercices · '+cfg.work+' s travail / '+cfg.rest+' s repos · '+cfg.rounds+' tours · pause '+fmt(cfg.roundRest)+' · env. '+Math.round(total/60)+' min';
+  if(isWarm())$('summary').textContent='Échauffement · '+EXERCISES.length+' exercices tout en douceur · env. '+Math.round(total/60)+' min';
+  else $('summary').textContent=SESSIONS[cfg.session].label+' · '+EXERCISES.length+' exercices · '+cfg.work+' s travail / '+cfg.rest+' s repos · '+cfg.rounds+' tours · pause '+fmt(cfg.roundRest)+' · env. '+Math.round(total/60)+' min';
   const ul=$('exList');ul.innerHTML='';
   EXERCISES.forEach((ex,i)=>{
     const li=document.createElement('li');
