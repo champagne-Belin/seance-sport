@@ -146,7 +146,7 @@ bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe'
 
 function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
 applySession();
-const APP_VERSION='5';
+const APP_VERSION='6';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
@@ -308,9 +308,51 @@ function cycleMusic(){
   cfg.music=order[(order.indexOf(cfg.music)+1)%order.length];save();musicChanged();
 }
 
+
+/* ====== Historique des séances réalisées ====== */
+const HKEY='seance-history';
+function loadHist(){try{const h=JSON.parse(localStorage.getItem(HKEY));return Array.isArray(h)?h:[];}catch(e){return[];}}
+function saveHist(h){try{localStorage.setItem(HKEY,JSON.stringify(h));return true;}catch(e){return false;}}
+function addHist(entry){const h=loadHist();h.push(entry);return saveHist(h);}
+const pad2=n=>String(n).padStart(2,'0');
+function mondayOf(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
+const fmtDate=iso=>{const d=new Date(iso);return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' · '+pad2(d.getHours())+':'+pad2(d.getMinutes());};
+function renderHistory(){
+  const h=loadHist().slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const now=new Date(),wk=mondayOf(now).getTime();
+  const thisWeek=h.filter(x=>new Date(x.date).getTime()>=wk).length;
+  const totalMin=Math.round(h.reduce((a,x)=>a+(x.sec||0),0)/60);
+  $('histStats').innerHTML='<div><b>'+h.length+'</b><span>séances</span></div><div><b>'+thisWeek+'</b><span>cette semaine</span></div><div><b>'+totalMin+'</b><span>minutes</span></div>';
+  // 8 dernières semaines
+  const bars=[];for(let i=7;i>=0;i--){const start=wk-i*7*864e5,end=start+7*864e5;bars.push(h.filter(x=>{const t=new Date(x.date).getTime();return t>=start&&t<end;}).length);}
+  const mx=Math.max(3,...bars);
+  $('histBars').innerHTML=bars.map((n,i)=>'<div class="bar"><i style="height:'+Math.round(n/mx*100)+'%"></i><span>'+(n||'')+'</span></div>').join('');
+  const ul=$('histList');ul.innerHTML='';
+  if(!h.length){ul.innerHTML='<li class="empty">Aucune séance enregistrée pour le moment. Elles apparaissent ici dès qu’une séance est terminée.</li>';return;}
+  h.forEach(x=>{
+    const li=document.createElement('li');
+    li.innerHTML='<div><b>'+(x.label||'Séance')+'</b><span class="muted"> · '+(x.sub||'')+'</span><div class="muted">'+fmtDate(x.date)+' · '+fmt(x.sec||0)+' · '+(x.rounds||'?')+' tours</div></div>';
+    const b=document.createElement('button');b.className='del';b.textContent='✕';b.setAttribute('aria-label','Supprimer');
+    b.addEventListener('click',()=>{if(confirm('Supprimer cette séance de l’historique ?')){saveHist(loadHist().filter(y=>y.date!==x.date));renderHistory();}});
+    li.appendChild(b);ul.appendChild(li);
+  });
+}
+function exportHist(){
+  const h=loadHist().sort((a,b)=>a.date.localeCompare(b.date));
+  const rows=['date;heure;seance;type;duree_min;tours;exercices'];
+  h.forEach(x=>{const d=new Date(x.date);rows.push([d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()),pad2(d.getHours())+':'+pad2(d.getMinutes()),x.label||'',x.sub||'',((x.sec||0)/60).toFixed(1).replace('.',','),x.rounds||'',x.count||''].join(';'));});
+  const csv='﻿'+rows.join('\n');
+  try{
+    const f=new File([csv],'historique-seances.csv',{type:'text/csv'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'Historique des séances'}).catch(()=>{});return;}
+  }catch(e){}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='historique-seances.csv';document.body.appendChild(a);a.click();a.remove();
+}
+function clearHist(){if(loadHist().length&&confirm('Effacer tout l’historique ? Cette action est définitive.')){saveHist([]);renderHistory();}}
+
 /* ====== Moteur du chrono ====== */
 const S={steps:[],idx:0,end:0,paused:false,remain:0,timer:0,lastSec:-1,flags:{},startedAt:0,wake:null};
-const screens=['home','workout','done'];
+const screens=['home','workout','done','history'];
 function show(id){screens.forEach(s=>$(s).classList.toggle('active',s===id));window.scrollTo(0,0);}
 
 function startWorkout(){
@@ -401,7 +443,9 @@ function finish(){
   beep(880,.25);setTimeout(()=>beep(1100,.4),300);vibe([300,100,300,100,500]);
   const dur=Math.round((Date.now()-S.startedAt)/1000);
   say('Fin du cycle '+cfg.rounds+'. Séance terminée. Bravo, belle séance !',true);
-  $('doneText').textContent=cfg.rounds+' tours · '+fmt(dur)+' · bravo !';
+  const se=SESSIONS[cfg.session]||SESSIONS.A;
+  const saved=addHist({date:new Date(S.startedAt).toISOString(),session:cfg.session,label:se.label,sub:se.sub,sec:dur,rounds:cfg.rounds,count:EXERCISES.length});
+  $('doneText').textContent=cfg.rounds+' tours · '+fmt(dur)+' · bravo !'+(saved?' Séance enregistrée dans l’historique.':'');
   show('done');
 }
 function togglePause(){
@@ -483,6 +527,11 @@ function renderHome(){
 }
 $('startBtn').addEventListener('click',startWorkout);
 $('updateBtn').addEventListener('click',updateApp);
+$('histBtn').addEventListener('click',()=>{renderHistory();show('history');});
+$('histBack').addEventListener('click',()=>{renderHome();show('home');});
+$('histExport').addEventListener('click',exportHist);
+$('histClear').addEventListener('click',clearHist);
+$('doneHist').addEventListener('click',()=>{renderHistory();show('history');});
 $('verInfo').textContent='Version '+APP_VERSION;
 $('pauseBtn').addEventListener('click',togglePause);
 $('musicBtn').addEventListener('click',cycleMusic);

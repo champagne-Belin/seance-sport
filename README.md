@@ -11,6 +11,9 @@ Application de chrono pour smartphone (PWA, fonctionne hors ligne une fois charg
 
 Le choix se fait sur l'écran d'accueil. Le bouton « Mettre à jour l'application » recharge la dernière version.
 
+## Historique
+Chaque séance terminée est enregistrée (date, séance, durée, tours) sur l'appareil. L'écran « Historique des séances » montre le total, la semaine en cours, les 8 dernières semaines et permet d'exporter en CSV.
+
 ## Musique
 Trois ambiances originales générées dans l'appli (Électro 128, Hip-hop 92, Power 140), au choix dans « Réglages » ou avec le bouton ♪ pendant la séance. La musique baisse quand la voix parle.
 

@@ -45,6 +45,7 @@
   </details>
 
   <button id="startBtn" class="big-btn">Commencer</button>
+  <button id="histBtn" class="link-btn" style="margin-top:12px">Historique des séances</button>
   <div class="foot"><span id="verInfo" class="muted"></span><button id="updateBtn" class="link-btn">Mettre à jour l’application</button></div>
 </section>
 
@@ -85,7 +86,25 @@
 <section id="done" class="screen">
   <h1>Séance terminée</h1>
   <p id="doneText" class="muted"></p>
+  <button id="doneHist" class="link-btn" style="margin-top:18px">Voir l’historique</button>
   <button id="againBtn" class="big-btn">Accueil</button>
+</section>
+
+<section id="history" class="screen">
+  <div class="topbar">
+    <button id="histBack" class="icon-btn" aria-label="Retour">←</button>
+    <div class="top-info">Historique</div>
+    <div style="width:40px"></div>
+  </div>
+  <div id="histStats" class="stats"></div>
+  <p class="muted small">Séances par semaine (8 dernières semaines)</p>
+  <div id="histBars" class="bars"></div>
+  <ul id="histList" class="hist-list"></ul>
+  <div class="foot">
+    <button id="histExport" class="link-btn">Exporter (CSV)</button>
+    <button id="histClear" class="link-btn">Effacer l’historique</button>
+    <p class="muted small">L’historique est conservé sur cet appareil (dans l’appli ou le navigateur utilisé).</p>
+  </div>
 </section>
 
 <script src="app.js"></script>
