@@ -146,7 +146,7 @@ bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe'
 
 function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
 applySession();
-const APP_VERSION='3';
+const APP_VERSION='4';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
@@ -443,7 +443,7 @@ async function updateApp(){
   try{
     if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();for(const r of rs)await r.unregister();}
     if(window.caches){const ks=await caches.keys();for(const k of ks)await caches.delete(k);}
-    for(const f of ['index.html','style.css','app.js','manifest.webmanifest','sw.js'])await fetch(f+'?u='+Date.now(),{cache:'reload'}).catch(()=>{});
+    for(const f of ['./','index.html','style.css','app.js','manifest.webmanifest','sw.js'])await fetch(f,{cache:'reload'}).catch(()=>{});
   }catch(e){}
   location.replace(location.pathname+'?v='+Date.now());
 }
