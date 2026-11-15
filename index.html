@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0f1720">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Séance">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+<title>Séance Sport</title>
+</head>
+<body data-phase="idle">
+
+<section id="home" class="screen active">
+  <header class="home-head">
+    <h1>Séance Sport</h1>
+    <p id="summary" class="muted"></p>
+  </header>
+
+  <ul id="exList" class="ex-list"></ul>
+
+  <details class="settings">
+    <summary>Réglages</summary>
+    <div class="grid">
+      <label>Travail (s)<input type="number" id="cfgWork" min="5" max="300" step="5"></label>
+      <label>Repos (s)<input type="number" id="cfgRest" min="0" max="120" step="5"></label>
+      <label>Pause de fin de tour (s)<input type="number" id="cfgRoundRest" min="0" max="600" step="5"></label>
+      <label>Nombre de tours<input type="number" id="cfgRounds" min="1" max="12" step="1"></label>
+      <label>Préparation (s)<input type="number" id="cfgPrep" min="0" max="60" step="5"></label>
+    </div>
+    <label class="check"><input type="checkbox" id="cfgVoice"> Voix</label>
+    <label class="check"><input type="checkbox" id="cfgSound"> Bips</label>
+    <label class="check"><input type="checkbox" id="cfgVibe"> Vibrations</label>
+  </details>
+
+  <button id="startBtn" class="big-btn">Commencer</button>
+</section>
+
+<section id="workout" class="screen">
+  <div class="topbar">
+    <button id="quitBtn" class="icon-btn" aria-label="Quitter">✕</button>
+    <div class="top-info">
+      <div id="roundInfo">Tour 1 / 4</div>
+      <div id="exInfo" class="muted">Exercice 1 / 7</div>
+    </div>
+    <div class="top-total"><span class="muted">Reste</span><b id="totalLeft">--:--</b></div>
+  </div>
+
+  <div class="phase" id="phaseLabel">PRÉPARATION</div>
+
+  <div class="ring-wrap">
+    <svg viewBox="0 0 120 120" class="ring">
+      <circle class="ring-bg" cx="60" cy="60" r="54"/>
+      <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="54"/>
+    </svg>
+    <div class="count" id="count">10</div>
+  </div>
+
+  <h2 id="exName">Squats avec poids</h2>
+  <p id="exSub" class="muted"></p>
+
+  <div class="fig-wrap"><svg id="fig" viewBox="0 0 200 200"></svg></div>
+  <p id="exTip" class="tip"></p>
+
+  <div class="controls">
+    <button id="prevBtn" class="ctl" aria-label="Précédent">⏮</button>
+    <button id="pauseBtn" class="ctl main" aria-label="Pause">⏸</button>
+    <button id="nextBtn" class="ctl" aria-label="Suivant">⏭</button>
+  </div>
+</section>
+
+<section id="done" class="screen">
+  <h1>Séance terminée</h1>
+  <p id="doneText" class="muted"></p>
+  <button id="againBtn" class="big-btn">Accueil</button>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>
