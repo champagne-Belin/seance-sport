@@ -129,7 +129,7 @@ function showFigure(ex,animate){
 }
 
 /* ====== Réglages ====== */
-const DEF={work:40,rest:20,roundRest:80,rounds:4,prep:10,voice:true,sound:true,vibe:true,music:'electro',musicVol:60,session:'A',who:''};
+const DEF={work:40,rest:20,roundRest:80,rounds:4,prep:10,voice:true,sound:true,vibe:true,music:'electro',musicVol:60,session:'A'};
 let cfg=Object.assign({},DEF,(()=>{try{return JSON.parse(localStorage.getItem('seance-cfg'))||{}}catch(e){return{}}})());
 const $=id=>document.getElementById(id);
 const save=()=>{try{localStorage.setItem('seance-cfg',JSON.stringify(cfg))}catch(e){}};
@@ -146,7 +146,7 @@ bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe'
 
 function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
 applySession();
-const APP_VERSION='7';
+const APP_VERSION='6';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
@@ -314,71 +314,11 @@ const HKEY='seance-history';
 function loadHist(){try{const h=JSON.parse(localStorage.getItem(HKEY));return Array.isArray(h)?h:[];}catch(e){return[];}}
 function saveHist(h){try{localStorage.setItem(HKEY,JSON.stringify(h));return true;}catch(e){return false;}}
 function addHist(entry){const h=loadHist();h.push(entry);return saveHist(h);}
-
-/* ====== Profils (qui fait la séance) ====== */
-const PKEY='seance-profiles';
-function loadProfiles(){try{const p=JSON.parse(localStorage.getItem(PKEY));return Array.isArray(p)?p:[];}catch(e){return[];}}
-function saveProfiles(p){try{localStorage.setItem(PKEY,JSON.stringify(p));}catch(e){}}
-function addProfile(){
-  const n=(prompt('Prénom de la personne qui fait la séance ?')||'').trim().slice(0,20);
-  if(!n)return false;
-  const p=loadProfiles();
-  const ex=p.find(x=>x.toLowerCase()===n.toLowerCase());
-  if(!ex)p.push(n);
-  saveProfiles(p);cfg.who=ex||n;save();renderWho();return true;
-}
-function renderWho(){
-  const seg=$('whoSeg');seg.innerHTML='';
-  loadProfiles().forEach(n=>{
-    const b=document.createElement('button');b.className='seg-btn who-btn'+(cfg.who===n?' on':'');
-    b.innerHTML='<b>'+esc(n)+'</b>';
-    b.addEventListener('click',()=>{cfg.who=n;save();seg.classList.remove('need');renderWho();});
-    seg.appendChild(b);
-  });
-  const a=document.createElement('button');a.className='seg-btn who-btn add';a.innerHTML='<b>+ Ajouter</b>';
-  a.addEventListener('click',()=>{seg.classList.remove('need');addProfile();});
-  seg.appendChild(a);
-}
-const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-/* ====== Envoi vers Notion (via Make) ====== */
-const SYNC_URL='https://hook.eu1.make.com/v9s0r0ghv8lkhcaoouc6vve14unk4tp2';
-let syncing=false;
-async function syncHist(){
-  if(syncing||!navigator.onLine)return 0;
-  syncing=true;let ok=0;
-  try{
-    const todo=loadHist().filter(x=>x.who&&!x.sent);
-    for(const x of todo){
-      const body=new URLSearchParams({who:x.who,label:x.label||'Séance',sub:x.sub||'',date:x.date,min:String(Math.round((x.sec||0)/6)/10),rounds:String(x.rounds||''),count:String(x.count||'')});
-      try{
-        await fetch(SYNC_URL,{method:'POST',mode:'no-cors',body});
-        const h=loadHist();const t=h.find(y=>y.date===x.date&&y.who===x.who);
-        if(t){t.sent=true;saveHist(h);}
-        ok++;
-      }catch(e){break;}
-    }
-  }finally{syncing=false;}
-  return ok;
-}
 const pad2=n=>String(n).padStart(2,'0');
 function mondayOf(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
 const fmtDate=iso=>{const d=new Date(iso);return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' · '+pad2(d.getHours())+':'+pad2(d.getMinutes());};
-let histFilter=null;
-function renderHistWho(){
-  const seg=$('histWho');seg.innerHTML='';
-  const names=loadProfiles();
-  [['','Tous']].concat(names.map(n=>[n,n])).forEach(([v,l])=>{
-    const b=document.createElement('button');b.className='seg-btn who-btn'+(histFilter===v?' on':'');
-    b.innerHTML='<b>'+esc(l)+'</b>';
-    b.addEventListener('click',()=>{histFilter=v;renderHistory();});
-    seg.appendChild(b);
-  });
-}
 function renderHistory(){
-  if(histFilter===null)histFilter=cfg.who||'';
-  renderHistWho();
-  const h=loadHist().filter(x=>!histFilter||x.who===histFilter).sort((a,b)=>b.date.localeCompare(a.date));
+  const h=loadHist().slice().sort((a,b)=>b.date.localeCompare(a.date));
   const now=new Date(),wk=mondayOf(now).getTime();
   const thisWeek=h.filter(x=>new Date(x.date).getTime()>=wk).length;
   const totalMin=Math.round(h.reduce((a,x)=>a+(x.sec||0),0)/60);
@@ -391,16 +331,16 @@ function renderHistory(){
   if(!h.length){ul.innerHTML='<li class="empty">Aucune séance enregistrée pour le moment. Elles apparaissent ici dès qu’une séance est terminée.</li>';return;}
   h.forEach(x=>{
     const li=document.createElement('li');
-    li.innerHTML='<div><b>'+(x.label||'Séance')+'</b><span class="muted"> · '+(x.sub||'')+'</span><div class="muted">'+(x.who?esc(x.who)+' · ':'')+fmtDate(x.date)+' · '+fmt(x.sec||0)+' · '+(x.rounds||'?')+' tours</div></div>';
+    li.innerHTML='<div><b>'+(x.label||'Séance')+'</b><span class="muted"> · '+(x.sub||'')+'</span><div class="muted">'+fmtDate(x.date)+' · '+fmt(x.sec||0)+' · '+(x.rounds||'?')+' tours</div></div>';
     const b=document.createElement('button');b.className='del';b.textContent='✕';b.setAttribute('aria-label','Supprimer');
-    b.addEventListener('click',()=>{if(confirm('Supprimer cette séance de l’historique ?')){saveHist(loadHist().filter(y=>!(y.date===x.date&&y.who===x.who)));renderHistory();}});
+    b.addEventListener('click',()=>{if(confirm('Supprimer cette séance de l’historique ?')){saveHist(loadHist().filter(y=>y.date!==x.date));renderHistory();}});
     li.appendChild(b);ul.appendChild(li);
   });
 }
 function exportHist(){
   const h=loadHist().sort((a,b)=>a.date.localeCompare(b.date));
-  const rows=['date;heure;personne;seance;type;duree_min;tours;exercices'];
-  h.forEach(x=>{const d=new Date(x.date);rows.push([d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()),pad2(d.getHours())+':'+pad2(d.getMinutes()),x.who||'',x.label||'',x.sub||'',((x.sec||0)/60).toFixed(1).replace('.',','),x.rounds||'',x.count||''].join(';'));});
+  const rows=['date;heure;seance;type;duree_min;tours;exercices'];
+  h.forEach(x=>{const d=new Date(x.date);rows.push([d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()),pad2(d.getHours())+':'+pad2(d.getMinutes()),x.label||'',x.sub||'',((x.sec||0)/60).toFixed(1).replace('.',','),x.rounds||'',x.count||''].join(';'));});
   const csv='﻿'+rows.join('\n');
   try{
     const f=new File([csv],'historique-seances.csv',{type:'text/csv'});
@@ -416,10 +356,6 @@ const screens=['home','workout','done','history'];
 function show(id){screens.forEach(s=>$(s).classList.toggle('active',s===id));window.scrollTo(0,0);}
 
 function startWorkout(){
-  if(!cfg.who||!loadProfiles().includes(cfg.who)){
-    if(!loadProfiles().length){if(!addProfile())return;}
-    else{const w=$('whoSeg');w.classList.add('need');w.scrollIntoView({behavior:'smooth',block:'center'});return;}
-  }
   initAudio();musicStart();$('musicBtn').textContent=musicLabel();
   S.steps=buildSteps();S.idx=0;S.paused=false;
   S.startedAt=Date.now();
@@ -508,10 +444,8 @@ function finish(){
   const dur=Math.round((Date.now()-S.startedAt)/1000);
   say('Fin du cycle '+cfg.rounds+'. Séance terminée. Bravo, belle séance !',true);
   const se=SESSIONS[cfg.session]||SESSIONS.A;
-  const saved=addHist({date:new Date(S.startedAt).toISOString(),session:cfg.session,label:se.label,sub:se.sub,sec:dur,rounds:cfg.rounds,count:EXERCISES.length,who:cfg.who||''});
-  const base=(cfg.who?cfg.who+' · ':'')+cfg.rounds+' tours · '+fmt(dur)+' · bravo !'+(saved?' Séance enregistrée dans l’historique.':'');
-  $('doneText').textContent=base;
-  syncHist().then(n=>{if(n&&$('done').classList.contains('active'))$('doneText').textContent=base+' Envoyée dans Notion.';});
+  const saved=addHist({date:new Date(S.startedAt).toISOString(),session:cfg.session,label:se.label,sub:se.sub,sec:dur,rounds:cfg.rounds,count:EXERCISES.length});
+  $('doneText').textContent=cfg.rounds+' tours · '+fmt(dur)+' · bravo !'+(saved?' Séance enregistrée dans l’historique.':'');
   show('done');
 }
 function togglePause(){
@@ -575,7 +509,7 @@ async function updateApp(){
   location.replace(location.pathname+'?v='+Date.now());
 }
 function renderHome(){
-  renderWho();renderSeg();
+  renderSeg();
   const steps=buildSteps();
   const total=steps.reduce((a,s)=>a+s.dur,0);
   $('summary').textContent=SESSIONS[cfg.session].label+' · '+EXERCISES.length+' exercices · '+cfg.work+' s travail / '+cfg.rest+' s repos · '+cfg.rounds+' tours · pause '+fmt(cfg.roundRest)+' · env. '+Math.round(total/60)+' min';
@@ -593,11 +527,11 @@ function renderHome(){
 }
 $('startBtn').addEventListener('click',startWorkout);
 $('updateBtn').addEventListener('click',updateApp);
-$('histBtn').addEventListener('click',()=>{histFilter=cfg.who||'';renderHistory();show('history');});
+$('histBtn').addEventListener('click',()=>{renderHistory();show('history');});
 $('histBack').addEventListener('click',()=>{renderHome();show('home');});
 $('histExport').addEventListener('click',exportHist);
 $('histClear').addEventListener('click',clearHist);
-$('doneHist').addEventListener('click',()=>{histFilter=cfg.who||'';renderHistory();show('history');});
+$('doneHist').addEventListener('click',()=>{renderHistory();show('history');});
 $('verInfo').textContent='Version '+APP_VERSION;
 $('pauseBtn').addEventListener('click',togglePause);
 $('musicBtn').addEventListener('click',cycleMusic);
@@ -606,7 +540,6 @@ $('prevBtn').addEventListener('click',()=>{initAudio();prevStep();});
 $('quitBtn').addEventListener('click',()=>{if(confirm('Quitter la séance ?'))quit();});
 $('againBtn').addEventListener('click',()=>{renderHome();show('home');});
 renderHome();$('musicBtn').textContent=musicLabel();
-syncHist();window.addEventListener('online',syncHist);
 
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
