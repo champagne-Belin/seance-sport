@@ -107,24 +107,26 @@ const TIPS={
  run:'Allure tranquille : vous devez pouvoir parler. Petites foulées, épaules relâchées.',
  walk:'Marchez d’un bon pas pour récupérer, respirez profondément.',
  fast:'Allure soutenue mais maîtrisée, foulées dynamiques, épaules relâchées.',
- easy:'Trottez très lentement ou marchez pour reprendre votre souffle.',
+ easy:'Trottez très lentement, petites foulées, respirez calmement pour récupérer.',
+ jogwarm:'Trottez très lentement pour réveiller les jambes et monter doucement en température.',
+ jogcool:'Ralentissez progressivement, petites foulées, respirez profondément.',
  cool:'Marchez doucement et laissez redescendre le cœur.',
  brisk:'Pas rapide, bras qui balancent, talon-pointe : vous pouvez parler mais plus chanter.',
  easywalk:'Ralentissez le pas, respirez calmement, relâchez les épaules.'
 };
 const RB=(k,dur,label,tip)=>({k,dur,label,tip:tip||TIPS[k]});
-const WARMUP=RB('walk',300,'Marche d’échauffement',TIPS.warm), COOL=RB('walk',300,'Retour au calme',TIPS.cool);
+const JWARM=RB('easy',300,'Trot d’échauffement',TIPS.jogwarm), JCOOL=RB('easy',300,'Retour au calme',TIPS.jogcool), COOL=RB('walk',300,'Retour au calme',TIPS.cool);
 const RUN_SESSIONS={
- R1:{label:'Reprise 1',sub:'Trot 1 min · marche 2 min',run:true,exercises:[],
-     run_blocks:[WARMUP,{rep:8,seq:[RB('run',60,'Trot léger'),RB('walk',120,'Marche active')]},COOL]},
- R2:{label:'Reprise 2',sub:'Trot 2 min · marche 1 min',run:true,exercises:[],
-     run_blocks:[WARMUP,{rep:8,seq:[RB('run',120,'Trot léger'),RB('walk',60,'Marche active')]},COOL]},
- R3:{label:'Reprise 3',sub:'Course 5 min · marche 1 min',run:true,exercises:[],
-     run_blocks:[WARMUP,{rep:4,seq:[RB('run',300,'Course tranquille'),RB('walk',60,'Marche active')]},COOL]},
+ R1:{label:'Reprise 1',sub:'Trot 1 min · trot lent 2 min',run:true,exercises:[],
+     run_blocks:[JWARM,{rep:8,seq:[RB('run',60,'Trot'),RB('easy',120,'Trot lent')]},JCOOL]},
+ R2:{label:'Reprise 2',sub:'Trot 2 min · trot lent 1 min',run:true,exercises:[],
+     run_blocks:[JWARM,{rep:8,seq:[RB('run',120,'Trot'),RB('easy',60,'Trot lent')]},JCOOL]},
+ R3:{label:'Reprise 3',sub:'Course 5 min · trot lent 1 min',run:true,exercises:[],
+     run_blocks:[JWARM,{rep:4,seq:[RB('run',300,'Course tranquille'),RB('easy',60,'Trot lent')]},JCOOL]},
  F1:{label:'Fractionné 30/90',sub:'Rapide 30 s · récup 1 min 30',run:true,exercises:[],
-     run_blocks:[WARMUP,{rep:8,seq:[RB('fast',30,'Rapide'),RB('easy',90,'Récupération')]},COOL]},
+     run_blocks:[JWARM,{rep:8,seq:[RB('fast',30,'Rapide'),RB('easy',90,'Récupération')]},JCOOL]},
  F2:{label:'Fractionné 1/1',sub:'Rapide 1 min · récup 1 min',run:true,exercises:[],
-     run_blocks:[WARMUP,{rep:10,seq:[RB('fast',60,'Rapide'),RB('easy',60,'Récupération')]},COOL]}
+     run_blocks:[JWARM,{rep:10,seq:[RB('fast',60,'Rapide'),RB('easy',60,'Récupération')]},JCOOL]}
 };
 const WSTART=RB('walk',300,'Marche d’échauffement',TIPS.warm);
 const WALK_SESSIONS={
@@ -235,7 +237,7 @@ bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe'
 
 function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
 applySession();
-const APP_VERSION='9';
+const APP_VERSION='10';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
