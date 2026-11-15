@@ -5,7 +5,9 @@ const STAND_LEGS=[[102,140],[100,175],[98,140],[96,175]];
 const PLANK_UP=pose([163,118],[150,125],[109,143],[150,150],[150,175],[76,156],[44,172],[76,156],[44,172]);
 const SQUAT_HANDS=pose([116,118],[105,125],[78,150],[115,148],[125,172],[108,142],[95,175],[104,142],[93,175]);
 
-const EXERCISES=[
+const PRESS=[pose([100,46],[100,60],[100,105],[110,82],[108,60],...STAND_LEGS),
+             pose([100,46],[100,60],[100,105],[112,36],[106,14],...STAND_LEGS)];
+const SESSION_A=[
  {name:'Squats avec poids',weight:true,foot:true,seg:1.1,
   tip:'Haltère contre la poitrine, dos droit, descendez les hanches vers l’arrière.',
   frames:[pose([100,46],[100,60],[100,105],[104,82],[112,68],...STAND_LEGS),
@@ -33,6 +35,38 @@ const EXERCISES=[
           pose([144,141],[130,147],[86,155],[130,172],[155,172],[52,165],[20,174],[52,165],[20,174])]}
 ];
 
+const CHAIR=[{x:66,y:140,w:34,h:35}];
+const SESSION_B=[
+ {name:'Soulevé de terre roumain',spoken:'Soulevé de terre roumain',weight:true,foot:true,seg:1.2,
+  tip:'Haltères le long des cuisses, hanches vers l’arrière, dos plat, remontez en serrant les fessiers.',
+  frames:[pose([100,46],[100,60],[100,105],[100,86],[100,108],[108,140],[112,175],[92,140],[88,175]),
+          pose([126,90],[112,95],[70,115],[113,115],[113,140],[82,146],[84,175],[86,146],[88,175])]},
+ {name:'Pont fessier avec poids',weight:true,foot:true,seg:1.1,
+  tip:'Sur le dos, haltère sur les hanches, poussez les talons et montez le bassin en serrant les fessiers.',
+  frames:[pose([38,166],[55,168],[100,168],[75,166],[98,160],[122,140],[140,172],[126,142],[144,172]),
+          pose([48,168],[62,166],[100,138],[80,152],[100,130],[133,140],[135,172],[137,142],[139,172])]},
+ {name:'Rowing à un bras',spoken:'Rowing à un bras',weight:true,foot:true,seg:0.9,switchSide:true,
+  tip:'Pied avant décalé, buste penché, tirez le coude vers la hanche. Changez de bras à la moitié.',
+  frames:[pose([127,83],[115,90],[75,115],[116,114],[118,140],[92,145],[105,175],[70,148],[52,172]),
+          pose([127,83],[115,90],[75,115],[92,106],[108,114],[92,145],[105,175],[70,148],[52,172])]},
+ {name:'Développé épaules',weight:true,foot:true,seg:1.0,
+  tip:'Haltères aux épaules, poussez vers le haut, gainage serré.',
+  frames:PRESS},
+ {name:'Dips sur chaise',weight:false,foot:true,seg:1.0,decor:CHAIR,
+  tip:'Mains sur le bord d’une chaise solide, fléchissez les coudes vers l’arrière, poussez pour remonter.',
+  frames:[pose([86,78],[90,92],[104,137],[89,116],[88,140],[136,152],[166,172],[138,154],[168,174]),
+          pose([90,103],[94,117],[106,160],[74,125],[88,140],[138,165],[168,175],[140,166],[170,175])]},
+ {name:'Mountain climbers',spoken:'Mountain climbers',weight:false,foot:false,seg:0.35,
+  tip:'Position de pompe, ramenez les genoux vers la poitrine en alternance, rythme soutenu.',
+  frames:[pose([163,118],[150,125],[109,143],[150,150],[150,175],[140,152],[118,174],[76,156],[44,172]),
+          pose([163,118],[150,125],[109,143],[150,150],[150,175],[76,156],[44,172],[140,152],[118,174])]}
+];
+const SESSIONS={
+  A:{label:'Séance A',sub:'Corps entier',exercises:SESSION_A},
+  B:{label:'Séance B',sub:'Fessiers, dos, triceps',exercises:SESSION_B}
+};
+let EXERCISES=SESSION_A;
+
 /* ====== Dessin ====== */
 const NS='http://www.w3.org/2000/svg';
 const el=(n,a={})=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;};
@@ -41,10 +75,11 @@ const ease=t=>(1-Math.cos(Math.PI*t))/2;
 const KEYS=['H','N','P','E','W','K1','A1','K2','A2'];
 function mix(p,q,t){const r={};for(const k of KEYS)r[k]=[lerp(p[k][0],q[k][0],t),lerp(p[k][1],q[k][1],t)];return r;}
 
-function buildFigure(svg){
+function buildFigure(svg,ex){
   svg.innerHTML='';
   const parts={};
   svg.appendChild(el('line',{x1:10,y1:178,x2:190,y2:178,stroke:'#33475b','stroke-width':3,'stroke-linecap':'round'}));
+  if(ex&&ex.decor)ex.decor.forEach(d=>svg.appendChild(el('rect',{x:d.x,y:d.y,width:d.w,height:d.h,rx:3,fill:'#2f4358'})));
   const g=el('g',{fill:'none','stroke-linecap':'round','stroke-linejoin':'round'});
   const mk=(id,color,w)=>{parts[id]=el('polyline',{stroke:color,'stroke-width':w});g.appendChild(parts[id]);};
   mk('legB','#5f7a94',7); mk('foot2','#5f7a94',6);
@@ -82,7 +117,7 @@ function poseAt(ex,t){
 const fig={parts:null,ex:null,raf:0,t0:0};
 function showFigure(ex,animate){
   const svg=document.getElementById('fig');
-  if(!fig.parts)fig.parts=buildFigure(svg);
+  fig.parts=buildFigure(svg,ex);
   fig.ex=ex;fig.t0=performance.now();
   cancelAnimationFrame(fig.raf);
   const loop=now=>{
@@ -94,7 +129,7 @@ function showFigure(ex,animate){
 }
 
 /* ====== Réglages ====== */
-const DEF={work:40,rest:20,roundRest:80,rounds:4,prep:10,voice:true,sound:true,vibe:true,music:'electro',musicVol:60};
+const DEF={work:40,rest:20,roundRest:80,rounds:4,prep:10,voice:true,sound:true,vibe:true,music:'electro',musicVol:60,session:'A'};
 let cfg=Object.assign({},DEF,(()=>{try{return JSON.parse(localStorage.getItem('seance-cfg'))||{}}catch(e){return{}}})());
 const $=id=>document.getElementById(id);
 const save=()=>{try{localStorage.setItem('seance-cfg',JSON.stringify(cfg))}catch(e){}};
@@ -108,6 +143,10 @@ bindCfg('cfgRounds','rounds',1);bindCfg('cfgPrep','prep',1);
 $('cfgMusic').value=cfg.music;$('cfgMusic').addEventListener('change',()=>{cfg.music=$('cfgMusic').value;save();musicChanged();});
 $('cfgMusicVol').value=cfg.musicVol;$('cfgMusicVol').addEventListener('input',()=>{cfg.musicVol=+$('cfgMusicVol').value;save();applyMusicVol();});
 bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe');
+
+function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
+applySession();
+const APP_VERSION='3';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
@@ -328,7 +367,7 @@ function tick(){
     S.lastSec=sec;
     if(st.type==='work'){
       const half=Math.round(st.dur/2);
-      if(sec===half&&st.dur>=20&&!S.flags.half){S.flags.half=1;say('Moitié.',true);beep(660,.15);}
+      if(sec===half&&st.dur>=20&&!S.flags.half){S.flags.half=1;say(EXERCISES[st.ex].switchSide?'Moitié. Changez de bras.':'Moitié.',true);beep(660,.15);}
       if(sec===10&&st.dur>=20&&!S.flags.ten){S.flags.ten=1;say('Dix secondes !',true);}
     }
     if(sec>=1&&sec<=3){beep(sec===1?740:620,.15);vibe(40);}
@@ -389,15 +428,35 @@ function releaseWake(){try{S.wake&&S.wake.release();}catch(e){}S.wake=null;}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&$('workout').classList.contains('active'))requestWake();});
 
 /* ====== Accueil ====== */
+function renderSeg(){
+  const seg=$('sessionSeg');seg.innerHTML='';
+  Object.keys(SESSIONS).forEach(k=>{
+    const b=document.createElement('button');
+    b.className='seg-btn'+(cfg.session===k?' on':'');
+    b.innerHTML='<b>'+SESSIONS[k].label+'</b><span>'+SESSIONS[k].sub+'</span>';
+    b.addEventListener('click',()=>{cfg.session=k;save();applySession();renderHome();});
+    seg.appendChild(b);
+  });
+}
+async function updateApp(){
+  const b=$('updateBtn');b.disabled=true;b.textContent='Mise à jour…';
+  try{
+    if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();for(const r of rs)await r.unregister();}
+    if(window.caches){const ks=await caches.keys();for(const k of ks)await caches.delete(k);}
+    for(const f of ['index.html','style.css','app.js','manifest.webmanifest','sw.js'])await fetch(f+'?u='+Date.now(),{cache:'reload'}).catch(()=>{});
+  }catch(e){}
+  location.replace(location.pathname+'?v='+Date.now());
+}
 function renderHome(){
+  renderSeg();
   const steps=buildSteps();
   const total=steps.reduce((a,s)=>a+s.dur,0);
-  $('summary').textContent=EXERCISES.length+' exercices · '+cfg.work+' s travail / '+cfg.rest+' s repos · '+cfg.rounds+' tours · pause '+fmt(cfg.roundRest)+' · env. '+Math.round(total/60)+' min';
+  $('summary').textContent=SESSIONS[cfg.session].label+' · '+EXERCISES.length+' exercices · '+cfg.work+' s travail / '+cfg.rest+' s repos · '+cfg.rounds+' tours · pause '+fmt(cfg.roundRest)+' · env. '+Math.round(total/60)+' min';
   const ul=$('exList');ul.innerHTML='';
   EXERCISES.forEach((ex,i)=>{
     const li=document.createElement('li');
     const svg=el('svg',{viewBox:'0 0 200 200'});
-    const parts=buildFigure(svg);
+    const parts=buildFigure(svg,ex);
     drawPose(parts,ex.frames[1],ex);
     li.innerHTML='<span class="n">'+(i+1)+'</span>';
     li.appendChild(svg);
@@ -406,6 +465,8 @@ function renderHome(){
   });
 }
 $('startBtn').addEventListener('click',startWorkout);
+$('updateBtn').addEventListener('click',updateApp);
+$('verInfo').textContent='Version '+APP_VERSION;
 $('pauseBtn').addEventListener('click',togglePause);
 $('musicBtn').addEventListener('click',cycleMusic);
 $('nextBtn').addEventListener('click',()=>{initAudio();go(S.idx+1);});

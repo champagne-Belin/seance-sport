@@ -5,6 +5,12 @@ Application de chrono pour smartphone (PWA, fonctionne hors ligne une fois charg
 **Séance** : squats avec poids, fentes, rowing, pompes, devil press (burpee avec poids + développé épaules), planche.
 **Rythme** : 40 s de travail / 20 s de repos, 1 min 20 de pause à la fin de chaque tour, 4 tours.
 
+## Séances
+- **Séance A** : corps entier (squats, fentes, rowing, pompes, devil press, planche)
+- **Séance B** : fessiers, dos, triceps (soulevé de terre roumain, pont fessier, rowing à un bras, développé épaules, dips sur chaise, mountain climbers)
+
+Le choix se fait sur l'écran d'accueil. Le bouton « Mettre à jour l'application » recharge la dernière version.
+
 ## Musique
 Trois ambiances originales générées dans l'appli (Électro 128, Hip-hop 92, Power 140), au choix dans « Réglages » ou avec le bouton ♪ pendant la séance. La musique baisse quand la voix parle.
 
