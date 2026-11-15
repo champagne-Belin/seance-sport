@@ -22,6 +22,7 @@
     <p id="summary" class="muted"></p>
   </header>
 
+  <div id="modeSeg" class="seg"></div>
   <div id="sessionSeg" class="seg"></div>
 
   <ul id="exList" class="ex-list"></ul>
@@ -86,6 +87,11 @@
 <section id="done" class="screen">
   <h1>Séance terminée</h1>
   <p id="doneText" class="muted"></p>
+  <div id="distBox" class="distbox" hidden>
+    <label for="distInput" class="muted">Distance parcourue (km)</label>
+    <div class="distrow"><input id="distInput" type="text" inputmode="decimal" placeholder="ex. 4,5" autocomplete="off"><button id="distSave" class="link-btn">Enregistrer</button></div>
+    <p id="distMsg" class="muted small"></p>
+  </div>
   <button id="doneHist" class="link-btn" style="margin-top:18px">Voir l’historique</button>
   <button id="againBtn" class="big-btn">Accueil</button>
 </section>

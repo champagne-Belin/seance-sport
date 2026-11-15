@@ -28,3 +28,10 @@ Trois ambiances originales générées dans l'appli (Électro 128, Hip-hop 92, P
 Ouvrir l'adresse GitHub Pages du dépôt, puis « Ajouter à l'écran d'accueil » (Safari : Partager ; Chrome : menu ⋮).
 Les durées, le nombre de tours, la voix, les bips et les vibrations se règlent dans « Réglages ».
 L'écran reste allumé pendant la séance.
+
+
+## Course et marche (v9)
+Trois onglets sur l'accueil : Renfo, Course, Marche. Chaque sortie est chronométrée avec voix et musique ; à la fin, on saisit la distance (km) et l'appli calcule l'allure. La distance peut aussi se saisir ou se corriger depuis l'historique (bouton ✎).
+- **Reprise 1 / 2 / 3** (~34 min) : alternance trot et marche, de plus en plus de course.
+- **Fractionné 30/90** (~26 min) et **Fractionné 1/1** (~30 min) : 8 ou 10 séries rapide / récupération, entre 5 min de marche d'échauffement et 5 min de retour au calme.
+- **Marche 1 à 4** (24 à 45 min) : marche vive alternée avec marche tranquille, puis marche active continue.

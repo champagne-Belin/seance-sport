@@ -88,10 +88,71 @@ const WARM=[
   frames:[pose([100,46],[100,60],[100,105],[104,84],[106,106],...STAND_LEGS),
           pose([100,40],[100,54],[100,99],[106,30],[104,8],[118,136],[130,169],[84,136],[72,169])]}
 ];
+
+/* ====== Course à pied ====== */
+const RUN_A=pose([106,46],[104,60],[100,104],[114,82],[126,72],[122,124],[110,150],[84,128],[62,138]);
+const RUN_B=pose([106,46],[104,60],[100,104],[90,82],[82,94],[84,128],[62,138],[122,124],[110,150]);
+const RUN_P1=pose([106,45],[104,59],[100,102],[100,84],[110,92],[96,134],[78,126],[102,142],[100,175]);
+const RUN_P2=pose([106,45],[104,59],[100,102],[100,84],[110,92],[102,142],[100,175],[96,134],[78,126]);
+const WALK_A=pose([100,46],[100,60],[100,105],[110,84],[116,104],[110,140],[118,175],[92,140],[78,175]);
+const WALK_B=pose([100,46],[100,60],[100,105],[90,84],[86,104],[92,140],[78,175],[110,140],[118,175]);
+const RUN_EX={name:'Course',weight:false,foot:true,seg:0.24,frames:[RUN_A,RUN_P1,RUN_B,RUN_P2]};
+const FAST_EX={name:'Rapide',weight:false,foot:true,seg:0.16,frames:[RUN_A,RUN_P1,RUN_B,RUN_P2]};
+const EASY_EX={name:'Trot lent',weight:false,foot:true,seg:0.32,frames:[RUN_A,RUN_P1,RUN_B,RUN_P2]};
+const WALK_EX={name:'Marche',weight:false,foot:true,seg:0.5,frames:[WALK_A,WALK_B]};
+const BRISK_EX={name:'Marche vive',weight:false,foot:true,seg:0.36,frames:[WALK_A,WALK_B]};
+const RUNEX={run:RUN_EX,fast:FAST_EX,easy:EASY_EX,walk:WALK_EX,brisk:BRISK_EX};
+const TIPS={
+ warm:'Marchez d’un pas vif pour réveiller les jambes. Respirez calmement.',
+ run:'Allure tranquille : vous devez pouvoir parler. Petites foulées, épaules relâchées.',
+ walk:'Marchez d’un bon pas pour récupérer, respirez profondément.',
+ fast:'Allure soutenue mais maîtrisée, foulées dynamiques, épaules relâchées.',
+ easy:'Trottez très lentement ou marchez pour reprendre votre souffle.',
+ cool:'Marchez doucement et laissez redescendre le cœur.',
+ brisk:'Pas rapide, bras qui balancent, talon-pointe : vous pouvez parler mais plus chanter.',
+ easywalk:'Ralentissez le pas, respirez calmement, relâchez les épaules.'
+};
+const RB=(k,dur,label,tip)=>({k,dur,label,tip:tip||TIPS[k]});
+const WARMUP=RB('walk',300,'Marche d’échauffement',TIPS.warm), COOL=RB('walk',300,'Retour au calme',TIPS.cool);
+const RUN_SESSIONS={
+ R1:{label:'Reprise 1',sub:'Trot 1 min · marche 2 min',run:true,exercises:[],
+     run_blocks:[WARMUP,{rep:8,seq:[RB('run',60,'Trot léger'),RB('walk',120,'Marche active')]},COOL]},
+ R2:{label:'Reprise 2',sub:'Trot 2 min · marche 1 min',run:true,exercises:[],
+     run_blocks:[WARMUP,{rep:8,seq:[RB('run',120,'Trot léger'),RB('walk',60,'Marche active')]},COOL]},
+ R3:{label:'Reprise 3',sub:'Course 5 min · marche 1 min',run:true,exercises:[],
+     run_blocks:[WARMUP,{rep:4,seq:[RB('run',300,'Course tranquille'),RB('walk',60,'Marche active')]},COOL]},
+ F1:{label:'Fractionné 30/90',sub:'Rapide 30 s · récup 1 min 30',run:true,exercises:[],
+     run_blocks:[WARMUP,{rep:8,seq:[RB('fast',30,'Rapide'),RB('easy',90,'Récupération')]},COOL]},
+ F2:{label:'Fractionné 1/1',sub:'Rapide 1 min · récup 1 min',run:true,exercises:[],
+     run_blocks:[WARMUP,{rep:10,seq:[RB('fast',60,'Rapide'),RB('easy',60,'Récupération')]},COOL]}
+};
+const WSTART=RB('walk',300,'Marche d’échauffement',TIPS.warm);
+const WALK_SESSIONS={
+ M1:{label:'Marche 1',sub:'Vive 2 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
+     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',120,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},RB('walk',180,'Retour au calme',TIPS.cool)]},
+ M2:{label:'Marche 2',sub:'Vive 3 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
+     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',180,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},COOL]},
+ M3:{label:'Marche 3',sub:'Vive 5 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
+     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',300,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},COOL]},
+ M4:{label:'Marche 4',sub:'Marche active continue 35 min',run:true,walkmode:true,exercises:[],
+     run_blocks:[WSTART,RB('brisk',2100,'Marche active'),COOL]}
+};
+const modeOf=se=>se.walkmode?'walk':se.run?'run':'gym';
+function runSteps(se){
+  const s=[];
+  se.run_blocks.forEach(b=>{
+    if(b.rep){for(let r=1;r<=b.rep;r++)b.seq.forEach(x=>s.push({type:x.k,dur:x.dur,label:x.label,tip:x.tip,rep:r,reps:b.rep}));}
+    else s.push({type:b.k,dur:b.dur,label:b.label,tip:b.tip});
+  });
+  return s;
+}
+const runTotal=se=>runSteps(se).reduce((a,x)=>a+x.dur,0);
 const SESSIONS={
   W:{label:'Échauffement',sub:'En douceur',warm:true,trans:5,exercises:WARM},
   A:{label:'Séance A',sub:'Corps entier',exercises:SESSION_A},
-  B:{label:'Séance B',sub:'Fessiers, dos, triceps',exercises:SESSION_B}
+  B:{label:'Séance B',sub:'Fessiers, dos, triceps',exercises:SESSION_B},
+  ...RUN_SESSIONS,
+  ...WALK_SESSIONS
 };
 let EXERCISES=SESSION_A;
 
@@ -174,7 +235,7 @@ bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe'
 
 function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
 applySession();
-const APP_VERSION='8';
+const APP_VERSION='9';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
@@ -187,8 +248,14 @@ function spokenDuration(s){
   return parts.join(' ')||'0 seconde';
 }
 const isWarm=()=>!!(SESSIONS[cfg.session]||{}).warm;
+const isRun=()=>!!(SESSIONS[cfg.session]||{}).run;
 function buildSteps(){
   const s=[];const n=EXERCISES.length;
+  if(isRun()){
+    const r=runSteps(SESSIONS[cfg.session]);
+    if(cfg.prep>0)r.unshift({type:'prep',dur:cfg.prep,label:r[0].label,tip:r[0].tip,round:0});
+    return r;
+  }
   if(isWarm()){
     if(cfg.prep>0)s.push({type:'prep',ex:0,round:0,dur:cfg.prep});
     EXERCISES.forEach((ex,i)=>{
@@ -354,12 +421,24 @@ function addHist(entry){const h=loadHist();h.push(entry);return saveHist(h);}
 const pad2=n=>String(n).padStart(2,'0');
 function mondayOf(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
 const fmtDate=iso=>{const d=new Date(iso);return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' · '+pad2(d.getHours())+':'+pad2(d.getMinutes());};
+const fmtKm=k=>String(k).replace('.',',');
+function fmtPace(p){let m=Math.floor(p),r=Math.round((p-m)*60);if(r===60){m++;r=0;}return m+':'+pad2(r);}
+function histDetail(x){
+  if(x.kind==='run')return fmtDate(x.date)+' · '+fmt(x.sec||0)+(x.km?' · '+fmtKm(x.km)+' km · '+fmtPace((x.sec/60)/x.km)+' /km':' · distance à saisir (✎)');
+  return fmtDate(x.date)+' · '+fmt(x.sec||0)+' · '+(x.rounds||'?')+' tours';
+}
+function askKm(x){
+  const v=parseFloat((prompt('Distance parcourue en km ? (ex. 4,5)',x.km?fmtKm(x.km):'')||'').replace(',','.'));
+  if(!(v>0&&v<200))return;
+  const h=loadHist(),e=h.find(y=>y.date===x.date);if(e){e.km=Math.round(v*100)/100;saveHist(h);renderHistory();}
+}
 function renderHistory(){
   const h=loadHist().slice().sort((a,b)=>b.date.localeCompare(a.date));
   const now=new Date(),wk=mondayOf(now).getTime();
   const thisWeek=h.filter(x=>new Date(x.date).getTime()>=wk).length;
   const totalMin=Math.round(h.reduce((a,x)=>a+(x.sec||0),0)/60);
-  $('histStats').innerHTML='<div><b>'+h.length+'</b><span>séances</span></div><div><b>'+thisWeek+'</b><span>cette semaine</span></div><div><b>'+totalMin+'</b><span>minutes</span></div>';
+  const kmTot=h.reduce((a,x)=>a+(x.km||0),0);
+  $('histStats').innerHTML='<div><b>'+h.length+'</b><span>séances</span></div><div><b>'+thisWeek+'</b><span>cette semaine</span></div><div><b>'+totalMin+'</b><span>minutes</span></div>'+(kmTot>0?'<div><b>'+fmtKm(Math.round(kmTot*10)/10)+'</b><span>km courus</span></div>':'');
   // 8 dernières semaines
   const bars=[];for(let i=7;i>=0;i--){const start=wk-i*7*864e5,end=start+7*864e5;bars.push(h.filter(x=>{const t=new Date(x.date).getTime();return t>=start&&t<end;}).length);}
   const mx=Math.max(3,...bars);
@@ -368,16 +447,17 @@ function renderHistory(){
   if(!h.length){ul.innerHTML='<li class="empty">Aucune séance enregistrée pour le moment. Elles apparaissent ici dès qu’une séance est terminée.</li>';return;}
   h.forEach(x=>{
     const li=document.createElement('li');
-    li.innerHTML='<div><b>'+(x.label||'Séance')+'</b><span class="muted"> · '+(x.sub||'')+'</span><div class="muted">'+fmtDate(x.date)+' · '+fmt(x.sec||0)+' · '+(x.rounds||'?')+' tours</div></div>';
+    li.innerHTML='<div><b>'+(x.label||'Séance')+'</b><span class="muted"> · '+(x.sub||'')+'</span><div class="muted">'+histDetail(x)+'</div></div>';
     const b=document.createElement('button');b.className='del';b.textContent='✕';b.setAttribute('aria-label','Supprimer');
     b.addEventListener('click',()=>{if(confirm('Supprimer cette séance de l’historique ?')){saveHist(loadHist().filter(y=>y.date!==x.date));renderHistory();}});
+    if(x.kind==='run'){const e=document.createElement('button');e.className='del';e.textContent='✎';e.setAttribute('aria-label','Saisir la distance');e.addEventListener('click',()=>askKm(x));li.appendChild(e);}
     li.appendChild(b);ul.appendChild(li);
   });
 }
 function exportHist(){
   const h=loadHist().sort((a,b)=>a.date.localeCompare(b.date));
-  const rows=['date;heure;seance;type;duree_min;tours;exercices'];
-  h.forEach(x=>{const d=new Date(x.date);rows.push([d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()),pad2(d.getHours())+':'+pad2(d.getMinutes()),x.label||'',x.sub||'',((x.sec||0)/60).toFixed(1).replace('.',','),x.rounds||'',x.count||''].join(';'));});
+  const rows=['date;heure;seance;type;duree_min;tours;exercices;distance_km'];
+  h.forEach(x=>{const d=new Date(x.date);rows.push([d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()),pad2(d.getHours())+':'+pad2(d.getMinutes()),x.label||'',x.sub||'',((x.sec||0)/60).toFixed(1).replace('.',','),x.rounds||'',x.count||'',x.km?fmtKm(x.km):''].join(';'));});
   const csv='﻿'+rows.join('\n');
   try{
     const f=new File([csv],'historique-seances.csv',{type:'text/csv'});
@@ -397,7 +477,7 @@ function startWorkout(){
   S.steps=buildSteps();S.idx=0;S.paused=false;
   S.startedAt=Date.now();
   if('speechSynthesis' in window)speechSynthesis.cancel();
-  say(isWarm()?'C’est parti. Échauffement tout en douceur.':'C’est parti. '+cfg.rounds+' cycles de '+EXERCISES.length+' exercices.',true);
+  say(isRun()?'C’est parti. '+SESSIONS[cfg.session].label+'. Environ '+Math.round(runTotal(SESSIONS[cfg.session])/60)+' minutes.':isWarm()?'C’est parti. Échauffement tout en douceur.':'C’est parti. '+cfg.rounds+' cycles de '+EXERCISES.length+' exercices.',true);
   show('workout');
   requestWake();
   enterStep(0,true);
@@ -409,11 +489,30 @@ function enterStep(i,first){
   S.end=Date.now()+st.dur*1000;
   renderStep(st);
   announceStart(st,first);
-  if(st.type==='work'){beep(880,.5);vibe([200]);}
-  else if(st.type==='rest'||st.type==='roundrest'){beep(440,.5);vibe([100,60,100]);}
+  if(st.type==='work'||st.type==='run'||st.type==='fast'||st.type==='brisk'){beep(880,.5);vibe([200]);}
+  else if(st.type==='rest'||st.type==='roundrest'||st.type==='walk'||st.type==='easy'){beep(440,.5);vibe([100,60,100]);}
   tick();
 }
+function announceRun(st){
+  if(st.type==='prep'){say('Préparez-vous. '+st.label+'.');return;}
+  const lbl=st.label;
+  say((st.rep?'Série '+st.rep+' sur '+st.reps+'. ':'')+lbl+'. '+spokenDuration(st.dur)+'.',true);
+}
+function renderRunStep(st){
+  const ph=st.type;
+  document.body.dataset.phase=ph==='prep'?'prep':(ph==='run'||ph==='fast'||ph==='brisk')?'work':'rest';
+  const labels={prep:'PRÉPARATION',run:'COURSE',fast:'RAPIDE',walk:'MARCHE',easy:'RÉCUP',brisk:'MARCHE VIVE'};
+  $('phaseLabel').textContent=labels[ph];
+  $('roundInfo').textContent=st.rep?'Série '+st.rep+' / '+st.reps:SESSIONS[cfg.session].label;
+  const real=S.steps.filter(x=>x.type!=='prep').length,cur=S.steps[0].type==='prep'?S.idx:S.idx+1;
+  $('exInfo').textContent=ph==='prep'?'Premier bloc':'Étape '+cur+' / '+real;
+  $('exName').textContent=st.label;
+  $('exTip').textContent=st.tip;
+  $('exSub').textContent=ph==='prep'?'Premier bloc':'';
+  showFigure(RUNEX[ph==='prep'?(S.steps[1]||st).type:ph],true);
+}
 function announceStart(st,first){
+  if(isRun()){announceRun(st);return;}
   if(isWarm()){
     if(st.type==='prep')say('Premier exercice : '+EXERCISES[0].name+'.');
     else if(st.type==='work'){const ex=EXERCISES[st.ex];say(spoken(ex)+'. '+spokenDuration(st.dur)+'.',true);}
@@ -437,6 +536,7 @@ function announceStart(st,first){
   }
 }
 function renderStep(st){
+  if(isRun()){renderRunStep(st);return;}
   const n=EXERCISES.length;
   const phase=st.type;
   document.body.dataset.phase=phase;
@@ -472,6 +572,10 @@ function tick(){
       if(sec===half&&st.dur>=20&&!S.flags.half){S.flags.half=1;say(EXERCISES[st.ex].switchSide?'Moitié. Changez de bras.':'Moitié.',true);beep(660,.15);}
       if(sec===10&&st.dur>=20&&!S.flags.ten){S.flags.ten=1;say('Dix secondes !',true);}
     }
+    if(st.type==='run'||st.type==='fast'||st.type==='walk'||st.type==='easy'||st.type==='brisk'){
+      if(st.dur>=180&&sec===Math.round(st.dur/2)&&!S.flags.half){S.flags.half=1;say('Moitié.',true);beep(660,.15);}
+      if(st.dur>=60&&sec===10&&!S.flags.ten){S.flags.ten=1;say('Dix secondes !',true);}
+    }
     if(sec>=1&&sec<=3){beep(sec===1?740:620,.15);vibe(40);}
   }
   if(ms<=0)nextStep();
@@ -482,9 +586,19 @@ function nextStep(){
 }
 function finish(){
   clearInterval(S.timer);releaseWake();musicStop();audioRelease();
+  $('distBox').hidden=true;
   document.body.dataset.phase='idle';
   beep(880,.25);setTimeout(()=>beep(1100,.4),300);vibe([300,100,300,100,500]);
   const dur=Math.round((Date.now()-S.startedAt)/1000);
+  if(isRun()){
+    const se=SESSIONS[cfg.session];
+    say(se.walkmode?'Marche terminée. Bravo ! Notez la distance parcourue.':'Sortie terminée. Bravo ! Notez la distance parcourue.',true);
+    S.lastEntry=new Date(S.startedAt).toISOString();
+    addHist({date:S.lastEntry,session:cfg.session,label:se.label,sub:se.sub,sec:dur,kind:'run'});
+    $('doneText').textContent=se.label+' · '+fmt(dur)+' · bravo ! Sortie enregistrée.';
+    $('distBox').hidden=false;$('distInput').value='';$('distMsg').textContent='';
+    show('done');return;
+  }
   if(isWarm()){
     say('Échauffement terminé. Vous êtes prêt. Bonne séance !',true);
     $('doneText').textContent='Échauffement terminé · '+fmt(dur)+' · vous êtes prêt, enchaînez avec votre séance !';
@@ -538,13 +652,44 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 /* ====== Accueil ====== */
 function renderSeg(){
-  const seg=$('sessionSeg');seg.innerHTML='';
-  Object.keys(SESSIONS).forEach(k=>{
+  const mode=modeOf(SESSIONS[cfg.session]||SESSIONS.A);
+  const ms=$('modeSeg');ms.innerHTML='';
+  [['gym','Renfo'],['run','Course'],['walk','Marche']].forEach(([m,l])=>{
+    const b=document.createElement('button');b.className='seg-btn'+(mode===m?' on':'');b.innerHTML='<b>'+l+'</b>';
+    b.addEventListener('click',()=>{
+      if(m===mode)return;
+      cfg.last=cfg.last||{};cfg.last[mode]=cfg.session;
+      const def={gym:'A',run:'R1',walk:'M1'};
+      cfg.session=cfg.last[m]&&SESSIONS[cfg.last[m]]?cfg.last[m]:def[m];
+      save();applySession();renderHome();
+    });
+    ms.appendChild(b);
+  });
+  const seg=$('sessionSeg');seg.innerHTML='';seg.classList.toggle('col',mode!=='gym');
+  Object.keys(SESSIONS).filter(k=>modeOf(SESSIONS[k])===mode).forEach(k=>{
     const b=document.createElement('button');
     b.className='seg-btn'+(cfg.session===k?' on':'');
-    b.innerHTML='<b>'+SESSIONS[k].label+'</b><span>'+SESSIONS[k].sub+'</span>';
+    const sub=SESSIONS[k].run?SESSIONS[k].sub+' · ~'+Math.round(runTotal(SESSIONS[k])/60)+' min':SESSIONS[k].sub;
+    b.innerHTML='<b>'+SESSIONS[k].label+'</b><span>'+sub+'</span>';
     b.addEventListener('click',()=>{cfg.session=k;save();applySession();renderHome();});
     seg.appendChild(b);
+  });
+}
+function renderRunHome(){
+  const se=SESSIONS[cfg.session];
+  $('summary').textContent=se.label+' · '+se.sub+' · env. '+Math.round(runTotal(se)/60)+' min';
+  const ul=$('exList');ul.innerHTML='';
+  const dm=d=>d<60?d+' s':(d%60?Math.floor(d/60)+' min '+d%60+' s':d/60+' min');
+  let n=0;
+  const row=(k,text)=>{
+    const li=document.createElement('li'),ex=RUNEX[k],svg=el('svg',{viewBox:'0 0 200 200'});
+    drawPose(buildFigure(svg,ex),ex.frames[0],ex);
+    li.innerHTML='<span class="n">'+(++n)+'</span>';li.appendChild(svg);
+    const t=document.createElement('span');t.className='t';t.textContent=text;li.appendChild(t);ul.appendChild(li);
+  };
+  se.run_blocks.forEach(b=>{
+    if(b.rep)row(b.seq[0].k,b.rep+' × ('+b.seq.map(x=>x.label+' '+dm(x.dur)).join(' + ')+')');
+    else row(b.k,b.label+' · '+dm(b.dur));
   });
 }
 async function updateApp(){
@@ -558,6 +703,7 @@ async function updateApp(){
 }
 function renderHome(){
   renderSeg();
+  if(isRun()){renderRunHome();return;}
   const steps=buildSteps();
   const total=steps.reduce((a,s)=>a+s.dur,0);
   if(isWarm())$('summary').textContent='Échauffement · '+EXERCISES.length+' exercices tout en douceur · env. '+Math.round(total/60)+' min';
@@ -574,6 +720,12 @@ function renderHome(){
     li.appendChild(t);ul.appendChild(li);
   });
 }
+$('distSave').addEventListener('click',()=>{
+  const v=parseFloat(($('distInput').value||'').replace(',','.'));
+  if(!(v>0&&v<200)){$('distMsg').textContent='Entrez une distance en km, par exemple 4,5.';return;}
+  const h=loadHist(),e=h.find(x=>x.date===S.lastEntry);
+  if(e){e.km=Math.round(v*100)/100;saveHist(h);$('distMsg').textContent='Enregistré : '+fmtKm(e.km)+' km · allure '+fmtPace((e.sec/60)/e.km)+' /km';}
+});
 $('startBtn').addEventListener('click',startWorkout);
 $('updateBtn').addEventListener('click',updateApp);
 $('histBtn').addEventListener('click',()=>{renderHistory();show('history');});
