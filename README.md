@@ -35,3 +35,8 @@ Trois onglets sur l'accueil : Renfo, Course, Marche. Chaque sortie est chronomé
 - **Reprise 1 / 2 / 3** (~34 min) : alternance trot et trot lent, de plus en plus de course, sans marche.
 - **Fractionné 30/90** (~26 min) et **Fractionné 1/1** (~30 min) : 8 ou 10 séries rapide / récupération, entre 5 min de trot d'échauffement et 5 min de retour au calme (trot lent).
 - **Marche 1 à 4** (24 à 45 min) : marche vive alternée avec marche tranquille, puis marche active continue.
+
+
+## Deezer et app Santé (v11)
+- **Deezer** : dans Réglages → Musique, choisir « Deezer / ma musique ». L'appli passe en son « ambiant » (iPhone) et laisse la musique de Deezer continuer ; la voix et les bips se superposent. Lancer la playlist dans Deezer (bouton « Ouvrir Deezer »), revenir dans l'appli, puis Commencer.
+- **Santé (iPhone)** : une page web ne peut pas écrire dans l'app Santé directement. Le bouton « ♥ Enregistrer dans Santé » (fin de séance ou historique) lance un raccourci de l'app Raccourcis qui reçoit un texte JSON `{activite, libelle, debut, minutes, km}` et enregistre l'entraînement. Le nom du raccourci se règle dans Réglages (par défaut « Séance Sport »). Valeurs de `activite` : `course`, `fractionne`, `marche`, `renfo`.

@@ -37,12 +37,23 @@
       <label>Préparation (s)<input type="number" id="cfgPrep" min="0" max="60" step="5"></label>
     </div>
     <div class="grid">
-      <label>Musique<select id="cfgMusic"><option value="off">Aucune</option><option value="electro">Électro (128)</option><option value="hiphop">Hip-hop (92)</option><option value="power">Power (140)</option></select></label>
+      <label>Musique<select id="cfgMusic"><option value="off">Aucune</option><option value="electro">Électro (128)</option><option value="hiphop">Hip-hop (92)</option><option value="power">Power (140)</option><option value="ext">Deezer / ma musique</option></select></label>
       <label>Volume musique<input type="range" id="cfgMusicVol" min="0" max="100" step="5"></label>
     </div>
+    <button id="deezerBtn" class="link-btn" type="button">Ouvrir Deezer</button>
+    <p class="muted small">Avec « Deezer / ma musique » : lancez votre playlist dans Deezer, revenez ici et appuyez sur Commencer. La musique continue, la voix et les bips se superposent. Interrupteur de sonnerie sur « son ».</p>
     <label class="check"><input type="checkbox" id="cfgVoice"> Voix</label>
     <label class="check"><input type="checkbox" id="cfgSound"> Bips</label>
     <label class="check"><input type="checkbox" id="cfgVibe"> Vibrations</label>
+    <div class="grid" style="grid-template-columns:1fr"><label>Santé (iPhone) · nom du raccourci<input type="text" id="cfgShortcut" autocomplete="off"></label></div>
+    <details class="help"><summary>Comment relier l’app Santé ?</summary>
+      <ol>
+        <li>Ouvrez l’app <b>Raccourcis</b> → « + » → nommez le raccourci comme ci-dessus.</li>
+        <li>Ajoutez « Obtenir un dictionnaire depuis » <i>Entrée du raccourci</i>.</li>
+        <li>Pour chaque activité (<code>course</code>, <code>fractionne</code>, <code>marche</code>, <code>renfo</code>), ajoutez « Si » + « Enregistrer l’entraînement » (type Course à pied, HIIT, Marche, Renforcement) avec la durée <code>minutes</code>, la distance <code>km</code> et la date <code>debut</code>.</li>
+        <li>À la fin d’une séance, touchez « Enregistrer dans Santé » (ou ♥ dans l’historique).</li>
+      </ol>
+    </details>
   </details>
 
   <button id="startBtn" class="big-btn">Commencer</button>
@@ -92,6 +103,7 @@
     <div class="distrow"><input id="distInput" type="text" inputmode="decimal" placeholder="ex. 4,5" autocomplete="off"><button id="distSave" class="link-btn">Enregistrer</button></div>
     <p id="distMsg" class="muted small"></p>
   </div>
+  <button id="healthBtn" class="link-btn" style="margin-top:14px" hidden>♥ Enregistrer dans Santé</button>
   <button id="doneHist" class="link-btn" style="margin-top:18px">Voir l’historique</button>
   <button id="againBtn" class="big-btn">Accueil</button>
 </section>

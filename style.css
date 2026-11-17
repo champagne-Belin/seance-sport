@@ -78,3 +78,9 @@ h2{margin:6px 0 0;font-size:26px;line-height:1.15}
 .distrow input{flex:1;background:var(--card);color:var(--text);border:2px solid #2a3a4a;border-radius:12px;padding:12px;font-size:18px}
 
 #modeSeg .seg-btn{padding:10px 4px}
+
+.settings input[type=text]{background:#101a24;border:1px solid #2a3a4a;color:var(--text);border-radius:8px;padding:8px;font-size:16px}
+.settings .help{margin-top:10px;font-size:13px;color:var(--muted)}
+.settings .help ol{padding-left:18px;line-height:1.5}
+.settings .help code{background:#101a24;padding:1px 4px;border-radius:4px}
+.settings .small{margin:8px 0}

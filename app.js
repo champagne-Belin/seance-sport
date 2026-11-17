@@ -220,7 +220,7 @@ function showFigure(ex,animate){
 }
 
 /* ====== Réglages ====== */
-const DEF={work:40,rest:20,roundRest:80,rounds:4,prep:10,voice:true,sound:true,vibe:true,music:'electro',musicVol:60,session:'A'};
+const DEF={work:40,rest:20,roundRest:80,rounds:4,prep:10,voice:true,sound:true,vibe:true,music:'electro',musicVol:60,session:'A',shortcut:'Séance Sport'};
 let cfg=Object.assign({},DEF,(()=>{try{return JSON.parse(localStorage.getItem('seance-cfg'))||{}}catch(e){return{}}})());
 const $=id=>document.getElementById(id);
 const save=()=>{try{localStorage.setItem('seance-cfg',JSON.stringify(cfg))}catch(e){}};
@@ -237,7 +237,7 @@ bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe'
 
 function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
 applySession();
-const APP_VERSION='10';
+const APP_VERSION='11';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
@@ -287,13 +287,21 @@ function silentWavUrl(){
   dv.setUint32(24,8000,true);dv.setUint32(28,16000,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,n*2,true);
   return URL.createObjectURL(new Blob([b],{type:'audio/wav'}));
 }
-function initAudio(){
-  /* iPhone : son « lecture » (audible même avec l'interrupteur silencieux) + lecteur silencieux qui garde le son actif */
-  try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+function applyAudioMode(){
+  /* « Deezer / ma musique » : son « ambiant » qui se mélange aux autres applis (la musique de Deezer continue).
+     Sinon : son « lecture » (audible même avec l'interrupteur silencieux) + lecteur silencieux qui garde le son actif. */
+  const ext=cfg.music==='ext';
+  try{if(navigator.audioSession)navigator.audioSession.type=ext?'ambient':'playback';}catch(e){}
   try{
-    if(!keepAlive){keepAlive=new Audio(silentWavUrl());keepAlive.loop=true;keepAlive.setAttribute('playsinline','');}
-    keepAlive.play().catch(()=>{});
+    if(ext){keepAlive&&keepAlive.pause();}
+    else{
+      if(!keepAlive){keepAlive=new Audio(silentWavUrl());keepAlive.loop=true;keepAlive.setAttribute('playsinline','');}
+      keepAlive.play().catch(()=>{});
+    }
   }catch(e){}
+}
+function initAudio(){
+  applyAudioMode();
   try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state!=='running')actx.resume();
     try{const ub=actx.createBuffer(1,1,22050),us=actx.createBufferSource();us.buffer=ub;us.connect(actx.destination);us.start(0);}catch(e){}
     if(!musicGain){musicGain=actx.createGain();musicGain.connect(actx.destination);applyMusicVol();}}catch(e){}
@@ -403,14 +411,15 @@ function applyMusicVol(){
   musicGain.gain.setTargetAtTime(lvl,actx.currentTime,.12);
 }
 function duck(on){M.duckN=Math.max(0,M.duckN+(on?1:-1));if(on)setTimeout(()=>{if(M.duckN>0){M.duckN=0;applyMusicVol();}},7000);applyMusicVol();}
-function musicLabel(){return TRACKS[cfg.music]?'♪ '+TRACKS[cfg.music].name:'♪ Aucune';}
+function musicLabel(){return TRACKS[cfg.music]?'♪ '+TRACKS[cfg.music].name:cfg.music==='ext'?'♪ Deezer / ma musique':'♪ Aucune';}
 function musicChanged(){
   $('cfgMusic').value=cfg.music;$('musicBtn').textContent=musicLabel();
+  applyAudioMode();
   if($('workout').classList.contains('active')&&!S.paused){cfg.music==='off'?musicStop():musicStart();}
 }
 function cycleMusic(){
   initAudio();
-  const order=['off','electro','hiphop','power'];
+  const order=['off','electro','hiphop','power','ext'];
   cfg.music=order[(order.indexOf(cfg.music)+1)%order.length];save();musicChanged();
 }
 
@@ -425,6 +434,13 @@ function mondayOf(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
 const fmtDate=iso=>{const d=new Date(iso);return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' · '+pad2(d.getHours())+':'+pad2(d.getMinutes());};
 const fmtKm=k=>String(k).replace('.',',');
 function fmtPace(p){let m=Math.floor(p),r=Math.round((p-m)*60);if(r===60){m++;r=0;}return m+':'+pad2(r);}
+/* ====== Santé (iPhone) via l'app Raccourcis ====== */
+const actOf=k=>/^R/.test(k||'')?'course':/^F/.test(k||'')?'fractionne':/^M/.test(k||'')?'marche':'renfo';
+function healthURL(x){
+  const payload={activite:actOf(x.session),libelle:x.label||'',debut:x.date,minutes:Math.round((x.sec||0)/6)/10,km:x.km||0};
+  return 'shortcuts://run-shortcut?name='+encodeURIComponent(cfg.shortcut||'Séance Sport')+'&input=text&text='+encodeURIComponent(JSON.stringify(payload));
+}
+function sendHealth(x){if(x)location.href=healthURL(x);}
 function histDetail(x){
   if(x.kind==='run')return fmtDate(x.date)+' · '+fmt(x.sec||0)+(x.km?' · '+fmtKm(x.km)+' km · '+fmtPace((x.sec/60)/x.km)+' /km':' · distance à saisir (✎)');
   return fmtDate(x.date)+' · '+fmt(x.sec||0)+' · '+(x.rounds||'?')+' tours';
@@ -453,6 +469,7 @@ function renderHistory(){
     const b=document.createElement('button');b.className='del';b.textContent='✕';b.setAttribute('aria-label','Supprimer');
     b.addEventListener('click',()=>{if(confirm('Supprimer cette séance de l’historique ?')){saveHist(loadHist().filter(y=>y.date!==x.date));renderHistory();}});
     if(x.kind==='run'){const e=document.createElement('button');e.className='del';e.textContent='✎';e.setAttribute('aria-label','Saisir la distance');e.addEventListener('click',()=>askKm(x));li.appendChild(e);}
+    const hb=document.createElement('button');hb.className='del';hb.textContent='♥';hb.setAttribute('aria-label','Enregistrer dans Santé');hb.addEventListener('click',()=>sendHealth(x));li.appendChild(hb);
     li.appendChild(b);ul.appendChild(li);
   });
 }
@@ -588,7 +605,7 @@ function nextStep(){
 }
 function finish(){
   clearInterval(S.timer);releaseWake();musicStop();audioRelease();
-  $('distBox').hidden=true;
+  $('distBox').hidden=true;$('healthBtn').hidden=true;
   document.body.dataset.phase='idle';
   beep(880,.25);setTimeout(()=>beep(1100,.4),300);vibe([300,100,300,100,500]);
   const dur=Math.round((Date.now()-S.startedAt)/1000);
@@ -598,7 +615,7 @@ function finish(){
     S.lastEntry=new Date(S.startedAt).toISOString();
     addHist({date:S.lastEntry,session:cfg.session,label:se.label,sub:se.sub,sec:dur,kind:'run'});
     $('doneText').textContent=se.label+' · '+fmt(dur)+' · bravo ! Sortie enregistrée.';
-    $('distBox').hidden=false;$('distInput').value='';$('distMsg').textContent='';
+    $('distBox').hidden=false;$('healthBtn').hidden=false;$('distInput').value='';$('distMsg').textContent='';
     show('done');return;
   }
   if(isWarm()){
@@ -608,6 +625,7 @@ function finish(){
   }
   say('Fin du cycle '+cfg.rounds+'. Séance terminée. Bravo, belle séance !',true);
   const se=SESSIONS[cfg.session]||SESSIONS.A;
+  S.lastEntry=new Date(S.startedAt).toISOString();$('healthBtn').hidden=false;
   const saved=addHist({date:new Date(S.startedAt).toISOString(),session:cfg.session,label:se.label,sub:se.sub,sec:dur,rounds:cfg.rounds,count:EXERCISES.length});
   $('doneText').textContent=cfg.rounds+' tours · '+fmt(dur)+' · bravo !'+(saved?' Séance enregistrée dans l’historique.':'');
   show('done');
@@ -728,6 +746,9 @@ $('distSave').addEventListener('click',()=>{
   const h=loadHist(),e=h.find(x=>x.date===S.lastEntry);
   if(e){e.km=Math.round(v*100)/100;saveHist(h);$('distMsg').textContent='Enregistré : '+fmtKm(e.km)+' km · allure '+fmtPace((e.sec/60)/e.km)+' /km';}
 });
+$('healthBtn').addEventListener('click',()=>sendHealth(loadHist().find(x=>x.date===S.lastEntry)));
+$('deezerBtn').addEventListener('click',()=>{location.href='deezer://';});
+$('cfgShortcut').value=cfg.shortcut;$('cfgShortcut').addEventListener('change',()=>{cfg.shortcut=($('cfgShortcut').value||'').trim()||'Séance Sport';$('cfgShortcut').value=cfg.shortcut;save();});
 $('startBtn').addEventListener('click',startWorkout);
 $('updateBtn').addEventListener('click',updateApp);
 $('histBtn').addEventListener('click',()=>{renderHistory();show('history');});
