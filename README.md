@@ -7,6 +7,7 @@ Application de chrono pour smartphone (PWA, fonctionne hors ligne une fois charg
 
 ## Séances
 - **Échauffement** (4 min, en douceur) : marche sur place 1 min, cercles de bras 30 s, rotations de hanches 30 s, squats en douceur 1 min, jumping jacks 1 min. Non compté dans l'historique.
+- **Réveil 7 min** (v12, onglet Renfo) : réveil musculaire de 7 minutes pile, sans poids. 10 s de préparation, 1 min de mobilité (cercles de bras, rotations de hanches, flexion avant), puis 6 exercices de 50 s avec 10 s de transition : squats lents, fentes alternées, pompes sur les genoux, planche, superman, pont fessier. Enregistré dans l'historique, avec bouton Santé.
 - **Séance A** : corps entier (squats, fentes, rowing, pompes, devil press, planche)
 - **Séance B** : fessiers, dos, triceps (soulevé de terre roumain, pont fessier, rowing à un bras, développé épaules, dips sur chaise, mountain climbers)
 

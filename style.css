@@ -84,3 +84,6 @@ h2{margin:6px 0 0;font-size:26px;line-height:1.15}
 .settings .help ol{padding-left:18px;line-height:1.5}
 .settings .help code{background:#101a24;padding:1px 4px;border-radius:4px}
 .settings .small{margin:8px 0}
+
+.seg.wrap{flex-wrap:wrap}
+.seg.wrap .seg-btn{flex:1 1 44%}
