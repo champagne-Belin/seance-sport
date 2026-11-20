@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#ffb3d9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Réveil">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+<title>Réveil kawaii</title>
+</head>
+<body data-phase="idle">
+
+<div class="sky" aria-hidden="true">
+  <span style="left:6%;top:8%;font-size:26px;animation-delay:0s">✨</span>
+  <span style="left:84%;top:6%;font-size:30px;animation-delay:-2s">💖</span>
+  <span style="left:44%;top:3%;font-size:22px;animation-delay:-4s">☁️</span>
+  <span style="left:90%;top:34%;font-size:24px;animation-delay:-1s">🌸</span>
+  <span style="left:3%;top:38%;font-size:28px;animation-delay:-5s">⭐</span>
+  <span style="left:78%;top:60%;font-size:26px;animation-delay:-3s">🦄</span>
+  <span style="left:8%;top:66%;font-size:24px;animation-delay:-6s">🎀</span>
+  <span style="left:50%;top:90%;font-size:26px;animation-delay:-2.5s">✨</span>
+  <span style="left:90%;top:88%;font-size:22px;animation-delay:-4.5s">💗</span>
+  <span style="left:4%;top:90%;font-size:26px;animation-delay:-1.5s">🌈</span>
+</div>
+
+<section id="welcome" class="screen">
+  <div class="big-emoji">🦄</div>
+  <h1>Coucou ! 🌸</h1>
+  <p class="muted">Bienvenue dans ton réveil kawaii.<br>Comment tu t’appelles ?</p>
+  <input id="nameInput" class="name-input" type="text" maxlength="20" autocomplete="given-name" placeholder="Ton prénom">
+  <button id="nameBtn" class="big-btn">C’est moi ! 💖</button>
+</section>
+
+<section id="home" class="screen">
+  <header class="home-head">
+    <h1 id="greet">Coucou ! 🌸</h1>
+    <p id="summary" class="muted"></p>
+  </header>
+
+  <div class="card-title">Ton carnet d’étoiles ⭐</div>
+  <div id="week" class="week"></div>
+  <p id="total" class="muted small total"></p>
+
+  <ul id="exList" class="ex-list"></ul>
+
+  <details class="settings">
+    <summary>Réglages ⚙️</summary>
+    <div class="grid">
+      <label>Musique<select id="cfgMusic"><option value="off">Aucune</option><option value="electro">Pop</option><option value="hiphop">Douceur</option><option value="ext">Ma musique</option></select></label>
+      <label>Volume musique<input type="range" id="cfgMusicVol" min="0" max="100" step="5"></label>
+    </div>
+    <p class="muted small">Avec « Ma musique » : lance ta playlist, reviens ici et appuie sur C’est parti. La musique continue, la voix se superpose. Interrupteur de sonnerie sur « son ».</p>
+    <label class="check"><input type="checkbox" id="cfgVoice"> Voix</label>
+    <label class="check"><input type="checkbox" id="cfgSound"> Bips</label>
+    <label class="check"><input type="checkbox" id="cfgVibe"> Vibrations</label>
+    <div class="grid" style="grid-template-columns:1fr"><label>Ton prénom<input type="text" id="cfgName" maxlength="20" autocomplete="off"></label></div>
+  </details>
+
+  <button id="startBtn" class="big-btn">C’est parti ! 💖</button>
+  <div class="foot"><span id="verInfo" class="muted"></span><button id="updateBtn" class="link-btn">Mettre à jour l’application</button></div>
+</section>
+
+<section id="workout" class="screen">
+  <div class="topbar">
+    <button id="quitBtn" class="icon-btn" aria-label="Quitter">✕</button>
+    <div class="top-info">
+      <div id="roundInfo">Réveil kawaii</div>
+      <div id="exInfo" class="muted">Défi 1 / 9</div>
+    </div>
+    <div class="top-total"><span class="muted">Reste</span><b id="totalLeft">--:--</b></div>
+  </div>
+
+  <div class="phase" id="phaseLabel">PRÉPARE-TOI</div>
+
+  <div class="ring-wrap">
+    <svg viewBox="0 0 120 120" class="ring">
+      <circle class="ring-bg" cx="60" cy="60" r="54"/>
+      <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="54"/>
+    </svg>
+    <div class="count" id="count">10</div>
+  </div>
+
+  <h2 id="exName">Grandis-toi comme une fleur</h2>
+  <p id="exSub" class="muted"></p>
+
+  <div class="fig-wrap"><svg id="fig" viewBox="0 0 200 200"></svg></div>
+  <p id="exTip" class="tip"></p>
+
+  <div class="controls">
+    <button id="prevBtn" class="ctl" aria-label="Précédent">⏮</button>
+    <button id="pauseBtn" class="ctl main" aria-label="Pause">⏸</button>
+    <button id="nextBtn" class="ctl" aria-label="Suivant">⏭</button>
+  </div>
+  <button id="musicBtn" class="chip">♪ Pop</button>
+</section>
+
+<section id="done" class="screen">
+  <div class="big-emoji">🎉</div>
+  <h1 id="doneTitle">Bravo !</h1>
+  <p id="doneText" class="muted"></p>
+  <div id="doneStars" class="done-stars"></div>
+  <button id="againBtn" class="big-btn">Accueil 🌸</button>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>
