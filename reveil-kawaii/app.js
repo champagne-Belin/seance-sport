@@ -55,6 +55,8 @@ const ease=t=>(1-Math.cos(Math.PI*t))/2;
 const KEYS=['H','N','P','E','W','K1','A1','K2','A2'];
 function mix(p,q,t){const r={};for(const k of KEYS)r[k]=[lerp(p[k][0],q[k][0],t),lerp(p[k][1],q[k][1],t)];return r;}
 const HAIR='#7b4b3a';
+let PHOTO=null;try{PHOTO=localStorage.getItem('kawaii-photo')||null}catch(e){}
+let clipN=0;
 function buildFigure(svg){
   svg.innerHTML='';
   const parts={};
@@ -66,6 +68,18 @@ function buildFigure(svg){
   mk('torso','#ff9ccb',11);
   mk('arm','#ffd2bd',6);
   const f=el('g');parts.face=f;
+  if(PHOTO){
+    const id='hc'+(clipN++);
+    const cp=el('clipPath',{id});cp.appendChild(el('circle',{cx:0,cy:0,r:20}));f.appendChild(cp);
+    f.appendChild(el('circle',{cx:-19,cy:-10,r:7,fill:HAIR}));
+    f.appendChild(el('circle',{cx:19,cy:-10,r:7,fill:HAIR}));
+    f.appendChild(el('circle',{cx:0,cy:0,r:22,fill:'#fff',stroke:'#ff9ccb','stroke-width':1.6}));
+    const im=el('image',{x:-20,y:-20,width:40,height:40,'clip-path':'url(#'+id+')',preserveAspectRatio:'xMidYMid slice',href:PHOTO});
+    im.setAttributeNS('http://www.w3.org/1999/xlink','href',PHOTO);
+    f.appendChild(im);
+    f.appendChild(el('path',{d:'M0,-22 L-8,-27 L-8,-17 Z M0,-22 L8,-27 L8,-17 Z',fill:'#ff4f9a'}));
+    f.appendChild(el('circle',{cx:0,cy:-22,r:2.2,fill:'#ffb3d6'}));
+  }else{
   f.appendChild(el('circle',{cx:-10,cy:-10,r:5.5,fill:HAIR}));
   f.appendChild(el('circle',{cx:10,cy:-10,r:5.5,fill:HAIR}));
   f.appendChild(el('circle',{cx:0,cy:0,r:12.5,fill:HAIR}));
@@ -78,6 +92,7 @@ function buildFigure(svg){
   f.appendChild(el('ellipse',{cx:-6.8,cy:5.5,rx:2.5,ry:1.6,fill:'#ff9fc4',opacity:.85}));
   f.appendChild(el('ellipse',{cx:6.8,cy:5.5,rx:2.5,ry:1.6,fill:'#ff9fc4',opacity:.85}));
   f.appendChild(el('path',{d:'M-2,5.5 Q0,8 2,5.5',fill:'none',stroke:'#c2457f','stroke-width':1.1}));
+  }
   g.appendChild(f);
   svg.appendChild(g);
   return parts;
@@ -112,7 +127,7 @@ function showFigure(ex,animate){
 }
 
 /* ====== Réglages et prénom ====== */
-const APP_VERSION='1';
+const APP_VERSION='3';
 const DEF={voice:true,sound:true,vibe:true,music:'electro',musicVol:50,name:''};
 let cfg=Object.assign({},DEF,(()=>{try{return JSON.parse(localStorage.getItem('kawaii-cfg'))||{}}catch(e){return{}}})());
 const $=id=>document.getElementById(id);
@@ -442,6 +457,24 @@ async function requestWake(){
 function releaseWake(){try{S.wake&&S.wake.release();}catch(e){}S.wake=null;}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&$('workout').classList.contains('active')){requestWake();try{actx&&actx.state!=='running'&&actx.resume();keepAlive&&!S.paused&&cfg.music!=='ext'&&keepAlive.play().catch(()=>{});}catch(e){}}});
 
+/* ====== Photo sur le personnage (gardée uniquement sur ce téléphone) ====== */
+function setPhoto(file){
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{
+    const w=img.naturalWidth,h=img.naturalHeight,m=Math.min(w,h);
+    const c=document.createElement('canvas');c.width=c.height=160;
+    c.getContext('2d').drawImage(img,(w-m)/2,(h-m)*0.3,m,m,0,0,160,160);
+    PHOTO=c.toDataURL('image/jpeg',.85);
+    try{localStorage.setItem('kawaii-photo',PHOTO);}catch(e){}
+    URL.revokeObjectURL(url);renderHome();
+  };
+  img.src=url;
+}
+function removePhoto(){PHOTO=null;try{localStorage.removeItem('kawaii-photo');}catch(e){}renderHome();}
+$('photoBtn').addEventListener('click',()=>$('photoFile').click());
+$('photoFile').addEventListener('change',()=>{const f=$('photoFile').files[0];if(f)setPhoto(f);$('photoFile').value='';});
+$('photoDel').addEventListener('click',removePhoto);
+
 /* ====== Accueil ====== */
 async function updateApp(){
   const b=$('updateBtn');b.disabled=true;b.textContent='Mise à jour…';
@@ -456,6 +489,8 @@ function renderHome(){
   $('greet').textContent='Coucou '+cfg.name+' ! 🌸';
   const total=buildSteps().reduce((a,s)=>a+s.dur,0);
   $('summary').textContent='Réveil de '+Math.round(total/60)+' minutes · '+EXOS.length+' mini-défis';
+  $('photoBtn').textContent=PHOTO?'📸 Changer ma photo':'📸 Ma photo sur le personnage';
+  $('photoDel').hidden=!PHOTO;
   renderWeek();
   const ul=$('exList');ul.innerHTML='';
   EXOS.forEach((ex,i)=>{
