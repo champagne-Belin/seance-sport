@@ -264,7 +264,7 @@ bindCfg('cfgVoice','voice');bindCfg('cfgSound','sound');bindCfg('cfgVibe','vibe'
 
 function applySession(){EXERCISES=(SESSIONS[cfg.session]||SESSIONS.A).exercises;}
 applySession();
-const APP_VERSION='12';
+const APP_VERSION='13';
 
 /* ====== Utilitaires ====== */
 const spoken=ex=>ex.spoken||ex.name;
@@ -781,7 +781,7 @@ $('distSave').addEventListener('click',()=>{
   if(e){e.km=Math.round(v*100)/100;saveHist(h);$('distMsg').textContent='Enregistré : '+fmtKm(e.km)+' km · allure '+fmtPace((e.sec/60)/e.km)+' /km';}
 });
 $('healthBtn').addEventListener('click',()=>sendHealth(loadHist().find(x=>x.date===S.lastEntry)));
-$('deezerBtn').addEventListener('click',()=>{location.href='deezer://';});
+$('deezerBtn').addEventListener('click',()=>{cfg.music='ext';save();musicChanged();location.href='deezer://';});
 $('cfgShortcut').value=cfg.shortcut;$('cfgShortcut').addEventListener('change',()=>{cfg.shortcut=($('cfgShortcut').value||'').trim()||'Séance Sport';$('cfgShortcut').value=cfg.shortcut;save();});
 $('startBtn').addEventListener('click',startWorkout);
 $('updateBtn').addEventListener('click',updateApp);
