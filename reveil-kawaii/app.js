@@ -112,8 +112,8 @@ function showFigure(ex,animate){
 }
 
 /* ====== Réglages et prénom ====== */
-const APP_VERSION='2';
-const DEF={kawaiiVoice:true,voice:true,sound:true,vibe:true,music:'electro',musicVol:50,name:''};
+const APP_VERSION='1';
+const DEF={voice:true,sound:true,vibe:true,music:'electro',musicVol:50,name:''};
 let cfg=Object.assign({},DEF,(()=>{try{return JSON.parse(localStorage.getItem('kawaii-cfg'))||{}}catch(e){return{}}})());
 const $=id=>document.getElementById(id);
 const save=()=>{try{localStorage.setItem('kawaii-cfg',JSON.stringify(cfg))}catch(e){}};
@@ -129,7 +129,7 @@ try{
 cfg.name=cleanName(cfg.name);
 
 function bindCheck(id,key){const i=$(id);i.checked=cfg[key];i.addEventListener('change',()=>{cfg[key]=i.checked;save();});}
-bindCheck('cfgVoice','voice');bindCheck('cfgKawaii','kawaiiVoice');bindCheck('cfgSound','sound');bindCheck('cfgVibe','vibe');
+bindCheck('cfgVoice','voice');bindCheck('cfgSound','sound');bindCheck('cfgVibe','vibe');
 $('cfgMusic').value=cfg.music;$('cfgMusic').addEventListener('change',()=>{cfg.music=$('cfgMusic').value;save();musicChanged();});
 $('cfgMusicVol').value=cfg.musicVol;$('cfgMusicVol').addEventListener('input',()=>{cfg.musicVol=+$('cfgMusicVol').value;save();applyMusicVol();});
 $('cfgName').value=cfg.name;
@@ -193,37 +193,21 @@ function beep(freq,dur,vol){
   o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);
 }
 function vibe(p){if(cfg.vibe&&navigator.vibrate)try{navigator.vibrate(p)}catch(e){}}
-let frVoice=null,jaVoice=null;
-const FEMALE=/am[ée]lie|audrey|marie|julie|virginie|aurélie|denise|eloise|google fran|female|femme/i;
+let frVoice=null;
 function pickVoice(){
   const vs=speechSynthesis.getVoices?speechSynthesis.getVoices():[];
-  const fr=vs.filter(v=>/^fr/i.test(v.lang));
-  frVoice=fr.find(v=>/^fr[-_]FR/i.test(v.lang)&&FEMALE.test(v.name))||fr.find(v=>FEMALE.test(v.name))||fr.find(v=>/^fr[-_]FR/i.test(v.lang))||fr[0]||null;
-  const ja=vs.filter(v=>/^ja/i.test(v.lang));
-  jaVoice=ja.find(v=>/kyoko|o-ren|haruka|nanami|google|female/i.test(v.name))||ja[0]||null;
+  frVoice=vs.find(v=>/^fr[-_]FR/i.test(v.lang))||vs.find(v=>/^fr/i.test(v.lang))||null;
 }
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
-function speak(text,urgent,lang){
+function say(text,urgent){
   if(!cfg.voice||!('speechSynthesis' in window))return;
   try{
     if(urgent)speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
-    const v=lang==='ja'?jaVoice:frVoice;
-    u.lang=lang==='ja'?'ja-JP':'fr-FR';if(v)u.voice=v;
-    u.rate=cfg.kawaiiVoice?1.08:1.05;
-    u.pitch=cfg.kawaiiVoice?(lang==='ja'?1.9:1.75):1;
+    u.lang='fr-FR';if(frVoice)u.voice=frVoice;u.rate=1.05;u.pitch=1.15;
     duck(true);u.onend=u.onerror=()=>duck(false);
     speechSynthesis.speak(u);
   }catch(e){}
-}
-const say=(text,urgent)=>speak(text,urgent,'fr');
-/* Petits cris d'encouragement en japonais (voix japonaise si le téléphone en a une, sinon lecture en français) */
-const JA=[['ファイト！','Fighto !'],['がんばって！','Gambatte !'],['すごい！','Sougoï !'],['いいね！','Ii né !'],['やったね！','Yatta né !']];
-let jaI=0;
-function sayJa(){
-  if(!cfg.kawaiiVoice)return;
-  const [kana,roma]=JA[jaI++%JA.length];
-  if(jaVoice)speak(kana,false,'ja');else speak(roma,false,'fr');
 }
 
 /* ====== Musique (synthétisée, originale) ====== */
@@ -393,8 +377,8 @@ function tick(){
     S.lastSec=sec;
     if(st.type==='work'){
       const half=Math.round(st.dur/2);
-      if(sec===half&&st.dur>=25&&!S.flags.half){S.flags.half=1;say(EXOS[st.ex].halfSay||cheer(),true);sayJa();beep(784,.15);}
-      if(sec===10&&st.dur>=30&&!S.flags.ten){S.flags.ten=1;say('Plus que dix secondes !',true);sayJa();}
+      if(sec===half&&st.dur>=25&&!S.flags.half){S.flags.half=1;say(EXOS[st.ex].halfSay||cheer(),true);beep(784,.15);}
+      if(sec===10&&st.dur>=30&&!S.flags.ten){S.flags.ten=1;say('Plus que dix secondes !',true);}
     }
     if(sec>=1&&sec<=3){beep(sec===1?784:659,.15);vibe(40);}
   }
@@ -411,7 +395,7 @@ function finish(){
   cancelAnimationFrame(fig.raf);
   const h=loadStars();h.push(new Date(S.startedAt).toISOString());saveStars(h);
   const compliment=COMPLIMENTS[Math.floor(Math.random()*COMPLIMENTS.length)];
-  say('Bravo '+cfg.name+' ! '+compliment,true);sayJa();
+  say('Bravo '+cfg.name+' ! '+compliment,true);
   $('doneTitle').textContent='Bravo '+cfg.name+' ! 🎉';
   $('doneText').textContent=compliment+' Ton ⭐ du jour est dans ton carnet.';
   const wc=weekCount(h);
