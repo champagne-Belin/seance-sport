@@ -162,7 +162,20 @@ const WALK_SESSIONS={
  M3:{label:'Marche 3',sub:'Vive 5 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
      run_blocks:[WSTART,{rep:4,seq:[RB('brisk',300,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},COOL]},
  M4:{label:'Marche 4',sub:'Marche active continue 35 min',run:true,walkmode:true,exercises:[],
-     run_blocks:[WSTART,RB('brisk',2100,'Marche active'),COOL]}
+     run_blocks:[WSTART,RB('brisk',2100,'Marche active'),COOL]},
+ M5:{label:'Retour 1,5 km',sub:'Marche rapide, allure soutenue et exercices · 15 min',run:true,walkmode:true,exercises:[],
+     run_blocks:[
+       RB('brisk',180,'Marche rapide',TIPS.brisk),
+       RB('fast',60,'Allure soutenue',TIPS.fast),
+       RB('walk',120,'Marche tranquille',TIPS.easywalk),
+       RB('fast',60,'Allure soutenue',TIPS.fast),
+       RB('brisk',30,'Montées de genoux','Montez les genoux en avançant, bras qui balancent.'),
+       RB('walk',90,'Marche tranquille',TIPS.easywalk),
+       RB('fast',60,'Allure soutenue',TIPS.fast),
+       RB('brisk',30,'Talons-fesses','Ramenez les talons vers les fesses en avançant.'),
+       RB('walk',90,'Marche tranquille',TIPS.easywalk),
+       RB('walk',180,'Retour au calme',TIPS.cool)
+     ]}
 };
 const modeOf=se=>se.walkmode?'walk':se.run?'run':'gym';
 function runSteps(se){
