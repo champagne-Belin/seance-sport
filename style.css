@@ -87,3 +87,8 @@ h2{margin:6px 0 0;font-size:26px;line-height:1.15}
 
 .seg.wrap{flex-wrap:wrap}
 .seg.wrap .seg-btn{flex:1 1 44%}
+
+.why{margin:14px 0;padding:14px 16px;border-radius:14px;background:#16222e;font-size:14px;line-height:1.5;color:#c9d4df}
+.why[hidden]{display:none}
+.why b{display:block;margin-bottom:6px;color:#fff;font-size:15px}
+.why p{margin:0}

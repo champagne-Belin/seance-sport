@@ -143,27 +143,22 @@ const RB=(k,dur,label,tip)=>({k,dur,label,tip:tip||TIPS[k]});
 const JWARM=RB('easy',300,'Trot d’échauffement',TIPS.jogwarm), JCOOL=RB('easy',300,'Retour au calme',TIPS.jogcool), COOL=RB('walk',300,'Retour au calme',TIPS.cool);
 const RUN_SESSIONS={
  R1:{label:'Reprise 1',sub:'Trot 1 min · trot lent 2 min',run:true,exercises:[],
+     why:'Alterner 1 min de trot et 2 min de trot lent, c’est reprendre la course en douceur : les tendons, les articulations et le souffle s’adaptent par petites touches. Le trot lent laisse le cœur redescendre, ce qui permet de tenir toute la séance sans s’épuiser.',
      run_blocks:[JWARM,{rep:8,seq:[RB('run',60,'Trot'),RB('easy',120,'Trot lent')]},JCOOL]},
  R2:{label:'Reprise 2',sub:'Trot 2 min · trot lent 1 min',run:true,exercises:[],
+     why:'Passer à 2 min de trot pour 1 min de trot lent augmente peu à peu le temps de course. Cette progression par étapes développe l’endurance tout en protégeant les articulations et en gardant du plaisir à courir.',
      run_blocks:[JWARM,{rep:8,seq:[RB('run',120,'Trot'),RB('easy',60,'Trot lent')]},JCOOL]},
  R3:{label:'Reprise 3',sub:'Course 5 min · trot lent 1 min',run:true,exercises:[],
+     why:'Des blocs de 5 min de course tranquille avec 1 min de trot lent construisent l’endurance de base : le cœur et les muscles apprennent à tenir un effort long, le trot lent sert de souffle de récupération.',
      run_blocks:[JWARM,{rep:4,seq:[RB('run',300,'Course tranquille'),RB('easy',60,'Trot lent')]},JCOOL]},
  F1:{label:'Fractionné 30/90',sub:'Rapide 30 s · récup 1 min 30',run:true,exercises:[],
+     why:'Le fractionné 30/90 alterne 30 s rapides et 1 min 30 de récupération. Les efforts courts font monter le cœur et améliorent la vitesse et la puissance ; la longue récupération permet de recommencer chaque série avec de la qualité.',
      run_blocks:[JWARM,{rep:8,seq:[RB('fast',30,'Rapide'),RB('easy',90,'Récupération')]},JCOOL]},
  F2:{label:'Fractionné 1/1',sub:'Rapide 1 min · récup 1 min',run:true,exercises:[],
-     run_blocks:[JWARM,{rep:10,seq:[RB('fast',60,'Rapide'),RB('easy',60,'Récupération')]},JCOOL]}
-};
-const WSTART=RB('walk',300,'Marche d’échauffement',TIPS.warm);
-const WALK_SESSIONS={
- M1:{label:'Marche 1',sub:'Vive 2 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
-     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',120,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},RB('walk',180,'Retour au calme',TIPS.cool)]},
- M2:{label:'Marche 2',sub:'Vive 3 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
-     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',180,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},COOL]},
- M3:{label:'Marche 3',sub:'Vive 5 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
-     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',300,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},COOL]},
- M4:{label:'Marche 4',sub:'Marche active continue 35 min',run:true,walkmode:true,exercises:[],
-     run_blocks:[WSTART,RB('brisk',2100,'Marche active'),COOL]},
- M5:{label:'Retour 1,5 km',sub:'Marche rapide, allure soutenue et exercices · 15 min',run:true,walkmode:true,exercises:[],
+     why:'Le fractionné 1/1 alterne 1 min rapide et 1 min de récupération. Cet équilibre fait travailler le souffle (VMA) et la capacité à enchaîner : le cœur monte, redescend, et s’habitue à récupérer vite.',
+     run_blocks:[JWARM,{rep:10,seq:[RB('fast',60,'Rapide'),RB('easy',60,'Récupération')]},JCOOL]},
+ R4:{label:'Retour 1,5 km',sub:'Allure soutenue 1 min · marche tranquille · exercices',run:true,exercises:[],
+     why:'Alterner 1 min d’allure soutenue et 1 à 2 min de marche tranquille, c’est du fractionné : le cœur monte puis redescend, le souffle progresse et la dépense d’énergie grimpe, avec un effort plus facile à tenir qu’une allure continue. Les montées de genoux font travailler les fléchisseurs de hanche et améliorent la coordination et la hauteur de foulée. Les talons-fesses renforcent les cuisses arrière et assouplissent l’avant des cuisses. Placés pendant la récupération, ces gestes gardent les muscles actifs sans casser le rythme. Les 3 minutes du début préparent muscles et articulations, celles de la fin ramènent le cœur au calme.',
      run_blocks:[
        RB('brisk',180,'Marche rapide',TIPS.brisk),
        RB('fast',60,'Allure soutenue',TIPS.fast),
@@ -174,8 +169,23 @@ const WALK_SESSIONS={
        RB('fast',60,'Allure soutenue',TIPS.fast),
        RB('brisk',30,'Talons-fesses','Ramenez les talons vers les fesses en avançant.'),
        RB('walk',90,'Marche tranquille',TIPS.easywalk),
-       RB('walk',180,'Retour au calme',TIPS.cool)
+       RB('walk',180,'Retour au calme','Marchez doucement et respirez profondément. Pourquoi ce choix : les fractionnés ont fait monter puis redescendre le cœur, ce qui développe le souffle. Les genoux hauts ont réveillé les hanches et les talons-fesses les cuisses arrière : ils soutiennent la foulée. Ce calme final aide le corps à récupérer.')
      ]}
+};
+const WSTART=RB('walk',300,'Marche d’échauffement',TIPS.warm);
+const WALK_SESSIONS={
+ M1:{label:'Marche 1',sub:'Vive 2 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
+     why:'Alterner marche vive et marche tranquille revient à faire un fractionné doux : le cœur monte puis redescend, avec un impact très léger sur les articulations. C’est une bonne porte d’entrée pour bouger régulièrement.',
+     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',120,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},RB('walk',180,'Retour au calme',TIPS.cool)]},
+ M2:{label:'Marche 2',sub:'Vive 3 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
+     why:'Des blocs de 3 min de marche vive avec 2 min de marche tranquille allongent le temps passé à bonne intensité. Le souffle progresse et la dépense d’énergie augmente sans à-coups.',
+     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',180,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},COOL]},
+ M3:{label:'Marche 3',sub:'Vive 5 min · tranquille 2 min',run:true,walkmode:true,exercises:[],
+     why:'Des blocs de 5 min de marche vive avec 2 min de marche tranquille développent l’endurance : le corps apprend à tenir une allure soutenue plus longtemps, puis récupère pendant les phases douces.',
+     run_blocks:[WSTART,{rep:4,seq:[RB('brisk',300,'Marche vive'),RB('walk',120,'Marche tranquille',TIPS.easywalk)]},COOL]},
+ M4:{label:'Marche 4',sub:'Marche active continue 35 min',run:true,walkmode:true,exercises:[],
+     why:'La marche active continue de 35 min entretient l’endurance et brûle des calories à régime stable. Le pas rapide, bras qui balancent, sollicite tout le corps avec un impact très léger.',
+     run_blocks:[WSTART,RB('brisk',2100,'Marche active'),COOL]}
 };
 const modeOf=se=>se.walkmode?'walk':se.run?'run':'gym';
 function runSteps(se){
@@ -742,8 +752,17 @@ function renderSeg(){
     seg.appendChild(b);
   });
 }
+function renderWhy(se){
+  const w=$('why');if(!w)return;
+  w.innerHTML='';
+  if(!se||!se.why){w.hidden=true;return;}
+  const h=document.createElement('b');h.textContent='Pourquoi cette séance ?';
+  const p=document.createElement('p');p.textContent=se.why;
+  w.appendChild(h);w.appendChild(p);w.hidden=false;
+}
 function renderRunHome(){
   const se=SESSIONS[cfg.session];
+  renderWhy(se);
   $('summary').textContent=se.label+' · '+se.sub+' · env. '+Math.round(runTotal(se)/60)+' min';
   const ul=$('exList');ul.innerHTML='';
   const dm=d=>d<60?d+' s':(d%60?Math.floor(d/60)+' min '+d%60+' s':d/60+' min');
@@ -771,6 +790,7 @@ async function updateApp(){
 function renderHome(){
   renderSeg();
   if(isRun()){renderRunHome();return;}
+  renderWhy(null);
   const steps=buildSteps();
   const total=steps.reduce((a,s)=>a+s.dur,0);
   if(isWarm())$('summary').textContent=SESSIONS[cfg.session].label+' · '+EXERCISES.length+' exercices · env. '+Math.round(total/60)+' min';
